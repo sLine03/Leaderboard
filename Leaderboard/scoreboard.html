@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <link rel="stylesheet" href="styles.css">
+      <title>Caught in the Phish</title>
+  </head>
+  <main>
+  <h1>Leaderboard</h1>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Score</th>
+        </tr>
+      </thead>
+      <tbody id="table-body">
+
+      </tbody>
+    </table>
+    <button onClick="newGame()">New Game</button>
+    <button id="resetBtn">Reset Leaderboard</button>
+  </main>
+
+ <script>
+    const resetBtn = document.getElementById("resetBtn");
+    const data = JSON.parse(localStorage.getItem("entries")) || [];
+    const tbody = document.getElementById("table-body");
+
+    function timeToSeconds(t) {
+        const [h, m, s] = t.split(":").map(Number);
+        return h * 3600 + m * 60 + s;
+    }
+
+    function newGame() {
+        window.location.href = "input.html";
+    }
+
+    // Sort by time (ascending)
+    data.sort((a, b) => timeToSeconds(a.score) - timeToSeconds(b.score));
+
+    // Populate the table
+    data.forEach(entry => {
+        const row = document.createElement("tr");
+
+        const nameCell = document.createElement("td");
+        nameCell.textContent = entry.name;
+
+        const scoreCell = document.createElement("td");
+        scoreCell.textContent = entry.score;
+
+        row.appendChild(nameCell);
+        row.appendChild(scoreCell);
+        tbody.appendChild(row);
+    });
+
+    // Reset Button
+    resetBtn.addEventListener("click", () => {
+        const confirmReset = confirm("Are you sure you want to reset the leaderboard?");
+        if (confirmReset) {
+            localStorage.removeItem("entries");
+            location.reload();
+        }
+    });
+</script>
+</html>

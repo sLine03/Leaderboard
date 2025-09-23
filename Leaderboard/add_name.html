@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <title>Caught in the Phish</title>
+</head>
+<body>
+    <form>
+        <div>
+        <label class="text" for="name">Team Name:</label>
+        <br>
+        <input class="input" type="text" id="name" name="name">
+        </div>
+    </form> <br>
+      <button onclick="submitData()">Next</button>
+
+  <script>
+    //save name for scoreboard
+    function submitData() {
+        const name = document.getElementById("name").value.trim();
+
+        // Store name under a separate key
+        localStorage.setItem("currentPlayer", name);
+
+        // Redirect to timer page
+        window.location.href = "timer.html";
+    }
+  </script>
+</body>
+</html>

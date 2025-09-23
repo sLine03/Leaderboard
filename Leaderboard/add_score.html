@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <title>Enter Score</title>
+</head>
+<body>
+  <h1>Enter Score for <br>"<span class="teamName" id="playerNameDisplay"></span>"</h1>
+  
+  <label class="text" for="score">Score:</label>
+  <input class="input" type="number" id="score" name="score" min="0" required />
+  <br><br>
+  <button onclick="submitScore()">Submit</button>
+
+  <script>
+    const playerName = localStorage.getItem("currentPlayer");
+    const playerTime = localStorage.getItem("lastTime");
+
+    document.getElementById("playerNameDisplay").textContent = playerName || "Unknown";
+
+    function submitScore() {
+      const score = parseInt(document.getElementById("score").value, 10);
+
+      if (isNaN(score)) {
+        alert("Please enter a valid score.");
+        return;
+      }
+
+      const entry = { name: playerName, time: playerTime, score: score };
+      let entries = JSON.parse(localStorage.getItem("entries")) || [];
+
+      entries.push(entry);
+      localStorage.setItem("entries", JSON.stringify(entries));
+      window.location.href = "scoreboard.html";
+    }
+  </script>
+</body>
+</html>

@@ -3,6 +3,7 @@
   <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@300;400;600;700&display=swap" rel="stylesheet">
       <link rel="stylesheet" href="styles.css">
       <title>Caught in the Phish</title>
   </head>
@@ -11,7 +12,9 @@
     <table>
       <thead>
         <tr>
+          <th>Rank</th>
           <th>Name</th>
+          <th>Time</th>
           <th>Score</th>
         </tr>
       </thead>
@@ -24,44 +27,58 @@
   </main>
 
  <script>
-    const resetBtn = document.getElementById("resetBtn");
-    const data = JSON.parse(localStorage.getItem("entries")) || [];
-    const tbody = document.getElementById("table-body");
+  const resetBtn = document.getElementById("resetBtn");
+  const data = JSON.parse(localStorage.getItem("entries")) || [];
+  const tbody = document.getElementById("table-body");
 
-    function timeToSeconds(t) {
-        const [h, m, s] = t.split(":").map(Number);
-        return h * 3600 + m * 60 + s;
+  function timeToSeconds(t) {
+    const [h, m, s] = t.split(":").map(Number);
+    return h * 3600 + m * 60 + s;
+  }
+
+  function newGame() {
+    window.location.href = "add_name.html";
+  }
+
+ // Sort by score DESC, then time ASC
+data.sort((a, b) => {
+  if (b.score !== a.score) {
+    return b.score - a.score; // Higher score first
+  }
+  return timeToSeconds(a.time) - timeToSeconds(b.time); // Lower time next
+});
+
+// Populate table with ranks
+data.forEach((entry, index) => {
+  const row = document.createElement("tr");
+
+  const rankCell = document.createElement("td");
+  rankCell.textContent = index + 1;
+
+  const nameCell = document.createElement("td");
+  nameCell.textContent = entry.name;
+
+  const timeCell = document.createElement("td");
+  timeCell.textContent = entry.time;
+
+  const scoreCell = document.createElement("td");
+  scoreCell.textContent = entry.score;
+
+  row.appendChild(rankCell);
+  row.appendChild(nameCell);
+  row.appendChild(timeCell);
+  row.appendChild(scoreCell);
+  tbody.appendChild(row);
+});
+
+
+  // Reset Button
+  resetBtn.addEventListener("click", () => {
+    const confirmReset = confirm("Are you sure you want to reset the leaderboard?");
+    if (confirmReset) {
+      localStorage.removeItem("entries");
+      location.reload();
     }
-
-    function newGame() {
-        window.location.href = "input.html";
-    }
-
-    // Sort by time (ascending)
-    data.sort((a, b) => timeToSeconds(a.score) - timeToSeconds(b.score));
-
-    // Populate the table
-    data.forEach(entry => {
-        const row = document.createElement("tr");
-
-        const nameCell = document.createElement("td");
-        nameCell.textContent = entry.name;
-
-        const scoreCell = document.createElement("td");
-        scoreCell.textContent = entry.score;
-
-        row.appendChild(nameCell);
-        row.appendChild(scoreCell);
-        tbody.appendChild(row);
-    });
-
-    // Reset Button
-    resetBtn.addEventListener("click", () => {
-        const confirmReset = confirm("Are you sure you want to reset the leaderboard?");
-        if (confirmReset) {
-            localStorage.removeItem("entries");
-            location.reload();
-        }
-    });
+  });
 </script>
 </html>

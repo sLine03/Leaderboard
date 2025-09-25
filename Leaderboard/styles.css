@@ -1,12 +1,11 @@
-
-
-/* Reset default browser styles */
+/* === Reset Styles === */
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
 }
 
+/* === Base Styles === */
 body {
     font-family: 'Titillium Web', sans-serif;
     background-image: url('images/SAIT_BG_Blue.jpg');
@@ -14,47 +13,102 @@ body {
     background-repeat: no-repeat;
     padding: 40px;
     text-align: center;
-    align-items: center;
-    justify-content: center;
     
 }
 
+/* === Headings === */
+h1, h2 {
+    color: white;
+    font-family: inherit;
+}
+
 h1 {
+    font-size: 50px;
     margin-bottom: 20px;
+}
+
+h1.scoreTitle{
     font-size: 40px;
-    color: white;
-    font-family: 'Titillium Web', sans-serif;
 }
 
-/* Leaderboard table */
+h1.title,
+h2.title {
+    text-align: left;
+    margin-bottom: 2px;
+}
+
+h2.title {
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    font-size: 20px;
+}
+
+/* === Main Container === */
+main {
+    width: 70%;
+    margin: auto;
+}
+
+/* === Logo === */
+.logoBoard {
+    float: right;
+    width: 100px;
+    height: 80px;
+    margin-top: 25px;
+}
+.logo {
+    float: center;
+    width: 70px;
+    height: 50px;
+    margin-top: 15px;
+    margin-bottom: 35px;
+}
+
+
+/* === Table Styles === */
 table {
-    width: 80%;
+    width: 90%;
     margin: 0 auto;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0 15px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    background-color: #fff;
+    border-radius: 10px;
 }
 
-thead {
-    background-color: #333;
+th {
+    border: none;
     color: white;
 }
 
-th, td {
-    padding: 12px 15px;
-    border: 1px solid #ddd;
+td {
+    padding: 12px 20px;
     text-align: center;
+    font-weight: bold;
+    text-transform: capitalize;
 }
 
-tbody tr:nth-child(even) {
-    background-color: #f2f2f2;
+
+tbody tr:not(.first-place):not(.second-place):not(.third-place) td {
+    background-color: white;
 }
 
-tbody tr:hover {
-    background-color: #e0f7fa;
+/* === Table Row Backgrounds for Placements === */
+.first-place {
+    background-image: url('images/gold.png');
+    background-size: cover;
 }
 
-/* Buttons */
+.second-place {
+    background-image: url('images/silver.png');
+    background-size: cover;
+}
+
+.third-place {
+    background-image: url('images/bronze.jpg');
+    background-size: cover;
+}
+
+/* === Buttons === */
 button {
     margin: 20px 10px;
     padding: 10px 20px;
@@ -64,39 +118,123 @@ button {
     border-radius: 5px;
     cursor: pointer;
     font-size: 1em;
-    font-family: 'Titillium Web', sans-serif;
+    font-family: inherit;
 }
 
 button:hover {
     background-color: #01579b;
 }
 
-.timer{
-    background-color: white;
-    font-size: 30px;
-    border-radius: 5px;
+/* === Misc Elements === */
+.timer {
+    background-color: transparent;
+    font-size: 90px;
+    border-style: solid;
+    border-radius: 20px;
+    border-width: 2px;
+    border-color: white;
+    color:white;
     margin: auto;
     padding: 10px;
-    width: 50%;
-    align-content: center;
+    width: 70%;
 }
 
-.teamName{
-    font-size: 30px;
-    margin: 10px;
-    padding: 10px;
+.teamName {
+    font-size: 40px;
+    border: none;
     text-align: center;
     font-weight: bold;
     text-transform: capitalize;
+    color: white;
+    background-color: transparent;
 }
 
-.text{
+.teamNameScore {
+    font-size: 35px;
+    margin: 10px;
+    border-collapse: collapse;
+    text-align: center;
+    font-weight: bold;
+    text-transform: capitalize;
     color: white;
-    font-size: 20px;
+    background-color: transparent;
+}
+.text {
+    color: white;
+    font-size: 25px;
     margin: 10px;
 }
 
-.input{
-    padding:5px;
-    font-size: 20px;
+.input {
+    padding: 5px;
+    font-size: 25px;
+    width: 100px;
+}
+
+.inputName {
+    padding: 5px;
+    margin-top: 10px;
+    font-size: 25px;
+    width: 250px;
+}
+
+/* === fish swiming on add name === */
+#containerFish {
+  width: 400px;
+  height: 400px;
+  position: relative;
+}
+
+#fish{
+    position: absolute;
+    width: 200px;
+    height: 250px;
+    left: 0;
+    top: 100px;
+    transition: transform 0.2s;
+
+}
+
+/* === img animation on scoreboard === */
+
+.fish{
+    float: right;
+    width: 170px;
+    height: 225px;
+    margin-top: 230px;
+    animation: shake 1.5s;
+    animation-iteration-count: infinite;
+}
+
+.envelope{
+    float: left;
+    width: 140px;
+    height: 150px;
+    margin-top: 230px;
+    animation: shakeEnv 0.5s;
+    animation-iteration-count: infinite;
+}
+
+@keyframes shake {
+    0% { transform: rotate(0deg); }
+    10% { transform: rotate(-2deg); }
+    20% { transform: rotate(-4deg); }
+    30% { transform: rotate(-6deg); }
+    40% { transform: rotate(-8deg); }
+    50% { transform: rotate(-10deg); }
+    60% { transform: rotate(-8deg); }
+    70% { transform: rotate(-6deg); }
+    80% { transform: rotate(-4deg); }
+    90% { transform: rotate(-2deg); }
+    95% { transform: rotate(0deg); }
+    100% { transform: rotate(2deg); }
+}
+
+@keyframes shakeEnv {
+    0% { transform: rotate(0deg); }
+    25% { transform: rotate(-2deg); }
+    50% { transform: rotate(-4deg); }
+    75% { transform: rotate(-2deg); }
+    100% { transform: rotate(-1deg); }
+
 }

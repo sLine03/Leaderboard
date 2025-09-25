@@ -1,0 +1,25 @@
+body {
+    background-image: url('images/SAIT_BG_Blue.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    margin: 0;
+    overflow: hidden;
+    
+}
+#containerFish {
+    position: relative;
+    width: 100%;
+}
+
+#fish{
+    position: absolute;
+    left: 0;
+    top: 100px;
+    transition: transform 0.2s;
+
+}
+
+.fish{
+    width: 170px;
+    height: 225px;
+}

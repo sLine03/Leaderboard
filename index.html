@@ -21,7 +21,7 @@
     <form onsubmit="submitData(); return false;"><br><br>
       <label class="text" for="name">Enter Team Name:</label>
       <input class="inputName" type="text" id="name" name="name" required /> <br>
-      <button type="submit">Next</button>
+      <button onclick="seeLeaderboard()"> See Leaderboard</button> <button type="submit">Next</button>
     </form>
 
     <div id="containerFish">
@@ -38,6 +38,10 @@
       }
       localStorage.setItem("currentPlayer", name);
       window.location.href = "timer.html";
+    }
+
+    function seeLeaderboard() {
+      window.location.href = "scoreboard.html";
     }
 
     function fishMove() {

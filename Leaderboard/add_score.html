@@ -8,30 +8,31 @@
   <title>Enter Score</title>
 </head>
 <body>
-  <img src="images/Jack.png" class="logo" alt="A description of the image">
-  <h1 class="scoreTitle">Enter Score for: <br><span class="teamNameScore" id="playerNameDisplay"></span></h1>
-  <hr style="width: 40%; margin: auto;"><br>
-  <label class="text" for="score">Score:</label>
-  <input class="input" type="number" id="score" name="score" min="0" required />
-  <br><br>
+  <img src="images/Jack.png" class="logo" alt="Logo">
+  <h1 class="scoreTitle">
+    Enter Score for: <br> <span class="teamNameScore" id="playerNameDisplay"></span>
+  </h1>
+  <hr style="width: 40%; margin: auto;" /><br><br>
+
+  <label class="text" for="score">Score:
+  <input class="input" type="number" id="score" min="0" required /> </label>
   <button onclick="submitScore()">Submit</button>
 
   <script>
-    const playerName = localStorage.getItem("currentPlayer");
-    const playerTime = localStorage.getItem("lastTime");
+    const playerName = localStorage.getItem("currentPlayer") || "Unknown";
+    const playerTime = localStorage.getItem("lastTime") || "00:00:00";
 
-    document.getElementById("playerNameDisplay").textContent = playerName || "Unknown";
+    document.getElementById("playerNameDisplay").textContent = playerName;
 
     function submitScore() {
       const score = parseInt(document.getElementById("score").value, 10);
-
       if (isNaN(score)) {
         alert("Please enter a valid score.");
         return;
       }
 
-      const entry = { name: playerName, time: playerTime, score: score };
-      let entries = JSON.parse(localStorage.getItem("entries")) || [];
+      const entry = { name: playerName, time: playerTime, score };
+      const entries = JSON.parse(localStorage.getItem("entries")) || [];
 
       entries.push(entry);
       localStorage.setItem("entries", JSON.stringify(entries));

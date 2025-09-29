@@ -1,97 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
-    <title>Caught in the Phish</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <title>Enter Time</title>
 </head>
 <body>
-    <img src="images/Goldfish Stickers.png" id="fish" alt="Fish" style="transform: scaleX(-1);  width: 200px;
-    height: 250px;">
-    <img src="images/Jack.png" class="logo" alt="A description of the image">
-    <h1>
-        <input class="teamName" type="text" id="playerName" readonly>
-    </h1>
-    <div class="timer" id="timerDisplay">00:00:00</div>
-    <button id="startButton">Start</button>
-    <button id="stopButton">Stop</button>
+  <img src="images/Jack.png" class="logo" alt="Logo" />
+  <h1 class="scoreTitle">
+    Enter Time For: <br>
+    <input class="teamName" type="text" id="playerName" readonly />
+  </h1>
+  <hr style="width: 40%; margin: auto;" />
 
-</body>
-<script>
-    
-    //reset timer
-    let sec = 0;
-    let min = 0;
-    let hours = 0;
-    let timerInterval;
+  <div class="time-inputs">
+    <div>
+      <label for="hours" class="text">Hours</label>
+      <input type="number" id="hours" class="input" min="0" max="23" value="0" />
+    </div>
+    <div>
+      <label for="minutes" class="text">Minutes</label>
+      <input type="number" id="minutes" class="input" min="0" max="59" value="0" />
+    </div>
+    <div>
+      <label for="seconds" class="text">Seconds</label>
+      <input type="number" id="seconds" class="input" min="0" max="59" value="0" />
+    </div>
+  </div>
 
+  <button onclick="submitTime()">Next</button>
 
-    //declaring constants
-    const timerDisplay = document.getElementById('timerDisplay');
-    const startButton = document.getElementById('startButton');
-    const stopButton = document.getElementById('stopButton');
+  <script>
     const nameInput = document.getElementById('playerName');
-    const savedName = localStorage.getItem("currentPlayer");
+    const playerName = localStorage.getItem("currentPlayer");
 
-    //check name
-    if (savedName) {
-        nameInput.value = savedName;
+    if (playerName) {
+      nameInput.value = playerName;
     } else {
-        alert("No player name found. Please go back and enter your name.");
+      alert("No player name found. Please go back and enter your name.");
     }
 
-    //show timer and formatting
-    function updateDisplay() {
-        const formattedHours = String(hours).padStart(2, '0');
-        const formattedMinutes = String(min).padStart(2, '0');
-        const formattedSeconds = String(sec).padStart(2, '0');
-        timerDisplay.textContent = `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
+    function submitTime() {
+      const h = document.getElementById("hours").value.padStart(2, '0');
+      const m = document.getElementById("minutes").value.padStart(2, '0');
+      const s = document.getElementById("seconds").value.padStart(2, '0');
+
+      const formattedTime = `${h}:${m}:${s}`;
+      localStorage.setItem("lastTime", formattedTime);
+      window.location.href = "add_score.html";
     }
-
-    //start timer button, updates deconds every 1000 miliseconds
-    function startTimer() {
-        if (!timerInterval) { // Prevent multiple intervals from starting
-            timerInterval = setInterval(() => {
-                sec++;
-                if (sec === 60) {
-                    sec = 0;
-                    min++;
-                    if (min === 60) {
-                        min = 0;
-                        hours++;
-                    }
-                }
-                updateDisplay();
-            }, 1000);
-        }
-    }
-
-    // stop timer, clear interval and log time for scoreboard
-    function stopTimer() {
-        clearInterval(timerInterval);
-        timerInterval = null;
-        logTime();
-    }
-
-    //log time function to send to the scoreboard, redirects to scoreboard page
-    function logTime() {
-        const time = timerDisplay.textContent;
-        const name = nameInput.value;
-
-        const entry = { name, score: time };
-
-        localStorage.setItem("lastTime", time);
-        window.location.href = "add_score.html";
-    }
-
-    // Add event listeners to the buttons
-    startButton.addEventListener('click', startTimer);
-    stopButton.addEventListener('click', stopTimer);
-
-    // Initial display update
-    updateDisplay();
-
-    </script>
+  </script>
+</body>
 </html>

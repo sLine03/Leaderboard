@@ -1,78 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
-    <title>Caught in the Phish</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <title>Caught in the Phish</title>
 </head>
 <body onload="fishMove()">
-    <h1 class="title">Cybersecurity Awareness Month    
-    <img src="images/Jack.png" class="logoBoard" alt="Logo">
+  <header>
+    <h1 class="title">
+      Cybersecurity Awareness Month
+      <img src="images/Jack.png" class="logoBoard" alt="Logo">
     </h1>
-
     <h2 class="title">Caught In The Phish Escape Room</h2>
-    <hr>
+    <hr />
+  </header>
 
-    <br><br><br>
+  <main>
+    <form onsubmit="submitData(); return false;"><br><br>
+      <label class="text" for="name">Enter Team Name:</label>
+      <input class="inputName" type="text" id="name" name="name" required /> <br>
+      <button type="submit">Next</button>
+    </form>
 
-    <form>
-        <div>
-        <label class="text" for="name">Enter team Name:</label>
-        <br>
-        <input class="inputName" type="text" id="name" name="name">
-        </div>
-    </form> <br>
+    <div id="containerFish">
+      <img src="images/Goldfish Stickers.png" id="fish" alt="Animated Fish">
+    </div>
+  </main>
 
-    <button onclick="submitData()">Next</button>
-
-    <br><br>
-
-    <div id="containerFish"><img src="images/Goldfish Stickers.png" id="fish" alt="Fish"></div>
-  
-    </body>
-
-    <script>
-    //save name for scoreboard
+  <script>
     function submitData() {
-        const name = document.getElementById("name").value.trim();
-
-        // Store name under a separate key
-        localStorage.setItem("currentPlayer", name);
-
-        // Redirect to timer page
-        window.location.href = "timer.html";
+      const name = document.getElementById("name").value.trim();
+      if (name === "") {
+        alert("Please enter a team name.");
+        return;
+      }
+      localStorage.setItem("currentPlayer", name);
+      window.location.href = "timer.html";
     }
-    //animation
-  var id = null;
-  var pos = 0;
-  var direction = 1; // 1 = right, -1 = left
-  var maxPos = 1000;
 
-  function fishMove() {
-    var elem = document.getElementById("fish");   
-    clearInterval(id);
-    id = setInterval(frame, 5);
+    function fishMove() {
+      const fish = document.getElementById("fish");
+      let pos = 0;
+      let direction = 1;
+      const maxPos = 900;
 
-    function frame() {
-      pos += direction;
-      elem.style.left = pos + 'px'; 
-
-      // Flip the fish image using scaleX
-      if (direction === 1) {
-        elem.style.transform = "scaleX(-1)";
-      } else {
-        elem.style.transform = "scaleX(1)";
-      }
-
-      // Reverse direction at edges
-      if (pos >= maxPos || pos <= 0) {
-        direction *= -1;
-      }
-
-  fishMove();
-      }
+      setInterval(() => {
+        pos += direction;
+        fish.style.left = `${pos}px`;
+        fish.style.transform = direction === 1 ? "scaleX(-1)" : "scaleX(1)";
+        if (pos >= maxPos || pos <= 0) direction *= -1;
+      }, 5);
     }
   </script>
+</body>
 </html>

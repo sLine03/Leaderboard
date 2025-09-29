@@ -103,7 +103,7 @@ tbody tr:not(.first-place):not(.second-place):not(.third-place) td {
 }
 
 .second-place {
-    background: url('images/silver.png') center/cover no-repeat;
+    background: url('images/Silver.png') center/cover no-repeat;
 }
 
 .third-place {

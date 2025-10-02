@@ -94,7 +94,7 @@ td {
 }
 
 tbody tr:not(.first-place):not(.second-place):not(.third-place) td {
-    background-color: rgba(54, 56, 69, 0.25)
+    background-color: rgba(86, 90, 112, 0.25)
 }
 
 /* *** Leaderboard Placements *** */

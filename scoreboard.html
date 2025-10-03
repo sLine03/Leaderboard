@@ -28,6 +28,7 @@
           <th>Name</th>
           <th>Time</th>
           <th>Score</th>
+          <th></th>
         </tr>
       </thead>
       <tbody id="table-body"></tbody>
@@ -36,6 +37,7 @@
     <div class="buttons">
       <button onclick="newGame()">Add New Team</button>
       <button id="resetBtn">Reset Leaderboard</button>
+      <button id="submitLeaderboard">Submit Leaderboard</button>
     </div>
   </main>
 
@@ -64,6 +66,38 @@
       }
     });
 
+    function editEntry(name) {
+    const entries = JSON.parse(localStorage.getItem("entries")) || [];
+    const entry = entries.find(e => e.name === name);
+
+    if (!entry) {
+      alert("Entry not found.");
+      return;
+    }
+
+    const newScore = prompt(`Edit score for ${entry.name}:`, entry.score);
+    const newTime = prompt(`Edit time (HH:MM:SS) for ${entry.name}:`, entry.time);
+
+    if (newScore === null || newTime === null) return;
+
+    const scoreNum = parseInt(newScore, 10);
+    const timeRegex = /^\d{2}:\d{2}:\d{2}$/;
+
+    if (isNaN(scoreNum) || !timeRegex.test(newTime)) {
+      alert("Invalid input. Score must be a number, time must be in HH:MM:SS format.");
+      return;
+    }
+
+  // Update the entry
+    entry.score = scoreNum;
+    entry.time = newTime;
+
+  // Save back to localStorage
+    localStorage.setItem("entries", JSON.stringify(entries));
+    location.reload(); // refresh to update table
+  }
+
+
     // Sort: score descending, then time ascending
     data.sort((a, b) => b.score - a.score || timeToSeconds(a.time) - timeToSeconds(b.time));
 
@@ -78,9 +112,11 @@
         <td>${entry.name}</td>
         <td>${formatTime(entry.time)}</td>
         <td>${entry.score}</td>
+        <td><button onclick="editEntry('${entry.name}')" class="edit_button"><img src="images/edit-white-icon.png" class="edit_image" alt="Edit"></button></td>
       `;
       tbody.appendChild(row);
     });
+
   </script>
 </body>
 </html>

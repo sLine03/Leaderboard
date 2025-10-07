@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <title>Caught in the Phish</title>
+</head>
+<body>
+  <h1>Edit Team Score</h1>
+  <hr style="width: 40%; margin: auto;"><br>
+  <div id="edit-form">
+    <p class="text"><strong>Team Name: </strong> <span id="teamName"></span></p>
+    
+    <br>
+    
+    <label class="text">Score:
+      <input type="number" class="input" id="score" min="0" required>
+    </label>
+    
+    <label class="text">Time (HH:MM:SS):
+      <input type="text" id="time" class="input" pattern="\\d{2}:\\d{2}:\\d{2}" required>
+    </label>
+    
+    <br><br>
+    
+    <button onclick="saveChanges()">Save</button>
+    <button onclick="window.location.href='scoreboard.html'">Cancel</button>
+  </div>
+
+  <script>
+    const targetName = localStorage.getItem("editTarget");
+    const entries = JSON.parse(localStorage.getItem("entries")) || [];
+
+    const entry = entries.find(e => e.name === targetName);
+    if (!entry) {
+      alert("Entry not found.");
+      window.location.href = "scoreboard.html";
+    }
+
+    document.getElementById("teamName").textContent = entry.name;
+    document.getElementById("score").value = entry.score;
+    document.getElementById("time").value = entry.time;
+
+    function saveChanges() {
+      const newScore = parseInt(document.getElementById("score").value, 10);
+      const newTime = document.getElementById("time").value;
+
+      const timeRegex = /^\d{2}:\d{2}:\d{2}$/;
+      if (isNaN(newScore) || !timeRegex.test(newTime)) {
+        alert("Please enter a valid score and time in HH:MM:SS format.");
+        return;
+      }
+
+      entry.score = newScore;
+      entry.time = newTime;
+
+      localStorage.setItem("entries", JSON.stringify(entries));
+      localStorage.removeItem("editTarget");
+      window.location.href = "scoreboard.html";
+    }
+  </script>
+</body>
+</html>

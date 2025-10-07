@@ -99,24 +99,28 @@
 
 
     // Sort: score descending, then time ascending
-    data.sort((a, b) => b.score - a.score || timeToSeconds(a.time) - timeToSeconds(b.time));
+  data.sort((a, b) => b.score - a.score || timeToSeconds(a.time) - timeToSeconds(b.time));
 
     data.forEach((entry, index) => {
-      const row = document.createElement("tr");
-      if (index === 0) row.classList.add("first-place");
-      else if (index === 1) row.classList.add("second-place");
-      else if (index === 2) row.classList.add("third-place");
+    const row = document.createElement("tr");
+    if (index === 0) row.classList.add("first-place");
+    else if (index === 1) row.classList.add("second-place");
+    else if (index === 2) row.classList.add("third-place");
 
-      row.innerHTML = `
-        <td>${index + 1}</td>
-        <td>${entry.name}</td>
-        <td>${formatTime(entry.time)}</td>
-        <td>${entry.score}</td>
-        <td><button onclick="editEntry('${entry.name}')" class="edit_button"><img src="images/edit-white-icon.png" class="edit_image" alt="Edit"></button></td>
-      `;
-      tbody.appendChild(row);
-    });
+    row.innerHTML = `
+      <td>${index + 1}</td>
+      <td>${entry.name}</td>
+      <td>${formatTime(entry.time)}</td>
+      <td>${entry.score}</td>
+      <td><button onclick="goToEdit('${entry.name}')" class="edit_button"><img src="images/edit-white-icon.png" class="edit_image" alt="Edit"></button></td>
+    `;
+    tbody.appendChild(row);
+  });
 
+  function goToEdit(name) {
+    localStorage.setItem("editTarget", name);
+    window.location.href = "edit_score.html";
+  }
   </script>
 </body>
 </html>

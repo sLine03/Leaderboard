@@ -135,7 +135,6 @@ function submitToGoogleSheet() {
   const sheetURL = "https://script.google.com/macros/s/AKfycbzOWkugvSGv5VI5l9ywSXxZWag_wBRENS3-CrYXH3WY-WUNel8c0anOuyNjsOsASfIq/exec";
 
   entries.forEach(entry => {
-    entry.session = sessionID;
 
     fetch(sheetURL, {
       method: "POST",

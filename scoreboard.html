@@ -125,29 +125,29 @@
 
   document.getElementById("submitLeaderboard").addEventListener("click", submitToGoogleSheet);
 
-function submitToGoogleSheet() {
-  const entries = JSON.parse(localStorage.getItem("entries")) || [];
-  if (entries.length === 0) {
-    alert("No entries to submit.");
-    return;
+  function submitToGoogleSheet() {
+    const entries = JSON.parse(localStorage.getItem("entries")) || [];
+    if (entries.length === 0) {
+      alert("No entries to submit.");
+      return;
+    }
+
+    const sheetURL = "https://script.google.com/macros/s/AKfycbzOWkugvSGv5VI5l9ywSXxZWag_wBRENS3-CrYXH3WY-WUNel8c0anOuyNjsOsASfIq/exec";
+
+    entries.forEach(entry => {
+      fetch(sheetURL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(entry)
+      });
+    });
+
+    alert("Leaderboard submitted to Google Sheets!");
   }
 
-  const sheetURL = "https://script.google.com/macros/s/AKfycbzOWkugvSGv5VI5l9ywSXxZWag_wBRENS3-CrYXH3WY-WUNel8c0anOuyNjsOsASfIq/exec";
-
-  entries.forEach(entry => {
-
-    fetch(sheetURL, {
-      method: "POST",
-      mode: "no-cors",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(entry)
-    });
-  });
-
-  alert(`Leaderboard submitted to Google Sheets!`);
-}
 
   </script>
   </body>

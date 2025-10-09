@@ -37,7 +37,7 @@
     <div class="buttons">
       <button onclick="newGame()">Add New Team</button>
       <button id="resetBtn">Reset Leaderboard</button>
-      <button onclick="submitToGoogleSheet()">Save Leaderboard</button>
+      <button id="submitLeaderboard">Save Leaderboard</button>
     </div>
   </main>
 
@@ -56,8 +56,6 @@
     }
 
     function newGame() {
-    const sessionID = getNewSessionID();
-    localStorage.setItem("currentSessionID", sessionID);
     window.location.href = "index.html";
     }
     
@@ -134,7 +132,6 @@ function submitToGoogleSheet() {
     return;
   }
 
-  const sessionID = localStorage.getItem("currentSessionID") || "Unknown Session";
   const sheetURL = "https://script.google.com/macros/s/AKfycbzOWkugvSGv5VI5l9ywSXxZWag_wBRENS3-CrYXH3WY-WUNel8c0anOuyNjsOsASfIq/exec";
 
   entries.forEach(entry => {
@@ -150,17 +147,8 @@ function submitToGoogleSheet() {
     });
   });
 
-  alert(`Leaderboard submitted to Google Sheets under ${sessionID}!`);
+  alert(`Leaderboard submitted to Google Sheets!`);
 }
-
-
-  function getNewSessionID() {
-  let counter = parseInt(localStorage.getItem("sessionCounter") || "0", 10);
-  counter++;
-  localStorage.setItem("sessionCounter", counter);
-  return `Session ${counter}`;
-}
-
 
   </script>
   </body>

@@ -70,6 +70,10 @@ main {
     }
 }
 
+.dashboard-main {
+    max-width: 1200px;
+}
+
 .time-inputs {
     display: flex;
     justify-content: center;
@@ -297,7 +301,8 @@ button:hover {
 /* *** Dashboard: Team Cards *** */
 .team-list {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: wrap;
     gap: 16px;
     margin-top: 20px;
 }
@@ -312,6 +317,8 @@ button:hover {
     align-items: flex-start;
     gap: 10px;
     text-align: left;
+    flex: 1 1 340px;
+    max-width: 420px;
 }
 
 .team-card.status-running {

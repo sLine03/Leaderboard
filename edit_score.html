@@ -1,702 +1,112 @@
-/* *** Reset Styles *** */
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <title>Caught in the Phish - Edit Team</title>
+</head>
+<body>
+  <header>
+    <h1 class="title">
+      Cyber Security Awareness Month
+      <img src="images/Jack.png" class="logoBoard" alt="Logo">
+    </h1>
+    <h2 class="title">Caught in a Phish - Edit Team</h2>
+    <hr>
+  </header>
 
-/* *** Base Styles *** */
-body {
-    font-family: 'Titillium Web', sans-serif;
-    background: url('images/SAIT_BG_Blue.jpg') no-repeat center center fixed;
-    background-size: cover;
-    padding: 40px;
-    text-align: center;
-    color: white;
-}
+  <main>
+    <div id="edit-form" class="edit-form-box">
+      <p class="text edit-team-name"><strong>Team Name: </strong> <span id="teamName"></span></p>
 
-/* *** Headings *** */
-h1, h2 {
-    font-family: inherit;
-    color: white;
-}
+      <div id="levels-container"></div>
 
-h1 {
-    font-size: 50px;
-    margin-bottom: 20px;
-}
+      <label class="text edit-score-label">Score:
+        <input type="number" class="input" id="score" min="0">
+      </label>
 
-h1.scoreTitle {
-    font-size: 40px;
-}
+      <div class="modal-buttons edit-form-actions">
+        <button onclick="saveChanges()">Save</button>
+        <button class="btn-neutral" onclick="window.location.href='scoreboard.html'">Cancel</button>
+      </div>
+    </div>
+  </main>
 
-h1.title,
-h2.title {
-    text-align: left;
-    margin-bottom: 2px;
-}
+  <script>
+    const TEAMS_KEY = "teams";
+    const UNIT_MS = { sec: 1000, min: 60 * 1000, hr: 60 * 60 * 1000 };
 
-h2.title {
-    font-size: 20px;
-    margin-bottom: 10px;
-}
+    const targetId = localStorage.getItem("editTarget");
+    const teams = JSON.parse(localStorage.getItem(TEAMS_KEY)) || [];
+    const team = teams.find(t => t.id === targetId);
 
-header hr,
-main > hr {
-    border: none;
-    border-top: 1px solid rgba(255, 255, 255, 0.3);
-    margin: 10px 0 20px;
-}
-
-/* *** Layout Containers *** */
-main {
-    width: 70%;
-    max-width: 900px;
-    margin: 0 auto;
-}
-
-@media (max-width: 700px) {
-    body {
-        padding: 20px;
-    }
-    main {
-        width: 100%;
-    }
-    h1 {
-        font-size: 34px;
-    }
-    .timer {
-        width: 100%;
-    }
-}
-
-.time-inputs {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    text-align: center;
-    margin-top: 20px;
-}
-
-
-/* *** Logo Styles *** */
-.logoBoard {
-    float: right;
-    width: 100px;
-    height: 80px;
-    margin-top: 25px;
-}
-
-.logo {
-    width: 70px;
-    height: 50px;
-    margin: 15px auto 35px;
-    display: block;
-}
-
-/* *** Tables *** */
-table {
-    width: 90%;
-    margin: 0 auto;
-    border-collapse: separate;
-    border-spacing: 0 15px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
-}
-
-th {
-    color: white;
-    font-weight: bold;
-}
-
-td {
-    padding: 12px 20px;
-    text-align: center;
-    font-weight: bold;
-    text-transform: capitalize;
-}
-
-tbody tr:not(.first-place):not(.second-place):not(.third-place) td {
-    background-color: rgba(86, 90, 112, 0.25)
-}
-
-/* *** Scoreboard Section Headings *** */
-.board-heading {
-    text-align: left;
-}
-
-.board-heading-spaced {
-    margin-top: 30px;
-}
-
-.board-heading-note {
-    font-size: 14px;
-    font-weight: normal;
-    opacity: 0.75;
-}
-
-/* *** Leaderboard Placements *** */
-.first-place {
-    background: url('images/gold.png') center/cover no-repeat;
-}
-
-.second-place {
-    background: url('images/silver.png') center/cover no-repeat;
-}
-
-.third-place {
-    background: url('images/bronze.jpg') center/cover no-repeat;
-}
-
-/* *** Inputs *** */
-.input,
-.inputName {
-    font-size: 25px;
-    padding: 5px;
-    border: none;
-    border-radius: 4px;
-}
-
-.input {
-    width: 100px;
-}
-
-.inputName {
-    width: 250px;
-    margin-top: 10px;
-}
-
-select.input {
-    font-size: 1.2rem;
-    padding: 8px 12px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-.input#time{
-    width: 150px;
-    margin-left: 10px;
-}
-.input#score{
-    margin-left: 10px;
-}
-
-/* *** Labels and Static Text *** */
-.text{
-    font-size: 25px;
-    margin: 10px;
-    display: block;
-}
-
-/* *** Team Name Display *** */
-.teamName { 
-    font-size: 35px; 
-    margin: 10px auto; 
-    border: none; 
-    text-align: center; 
-    font-weight: bold; 
-    text-transform: capitalize; 
-    color: white; 
-    background-color: transparent; 
-} 
-
-.teamNameScore { 
-    font-size: 35px;
-    font-weight: bold;
-    text-transform: capitalize;
-    background: transparent;
-    color: white;
-    text-align: center;
-    margin: 10px auto; 
-}
-
-/* *** Timer Display *** */
-.timer {
-    font-size: 90px;
-    padding: 10px;
-    width: 70%;
-    margin: 0 auto;
-    border: 2px solid white;
-    border-radius: 20px;
-    background: transparent;
-    color: white;
-}
-
-/* *** Buttons *** */
-.edit_button {
-    background-color: transparent;
-    margin:auto;
-    padding: 0%;
-}
-.edit_button:hover{
-    background-color: transparent;
-}
-
-.edit_image {
-    width: 15px;
-    height: 15px;
-}
-
-button {
-    margin: 20px 10px;
-    padding: 10px 20px;
-    font-size: 1em;
-    font-family: inherit;
-    background-color: #0277bd;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+    if (!team) {
+      alert("Team not found.");
+      window.location.href = "scoreboard.html";
     }
 
-button:hover {
-    background-color: #01579b;
-}
+    document.getElementById("teamName").textContent = team.name;
+    document.getElementById("score").value = team.score ?? "";
 
+    const levelsContainer = document.getElementById("levels-container");
 
+    function renderLevels() {
+      levelsContainer.innerHTML = "";
+      team.levels.forEach((lvl, i) => {
+        const row = document.createElement("div");
+        row.className = "level-input-row edit-level-row";
+        row.innerHTML = `
+          <label class="text edit-level-label">Level ${i + 1}:</label>
+          <input type="number" class="input level-value" min="0" value="${lvl.value}" data-index="${i}">
+          <select class="input level-unit" data-index="${i}">
+            <option value="min" ${lvl.unit === "min" ? "selected" : ""}>Min</option>
+            <option value="sec" ${lvl.unit === "sec" ? "selected" : ""}>Sec</option>
+            <option value="hr" ${lvl.unit === "hr" ? "selected" : ""}>Hr</option>
+          </select>
+        `;
+        levelsContainer.appendChild(row);
+      });
 
-/* *** Launcher Buttons (Index Page) *** */
-.launcher-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    margin-top: 30px;
-    margin-bottom: 30px;
-}
-
-/* *** Scoreboard Action Buttons *** */
-.buttons {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 20px;
-}
-
-.buttons button {
-    margin: 0;
-}
-
-/* *** Dashboard: Add Team Form *** */
-.dashboard-add-form {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    flex-wrap: wrap;
-    margin-bottom: 10px;
-}
-
-.dashboard-add-form .inputName {
-    margin-top: 0;
-}
-
-.dashboard-actions {
-    margin-bottom: 10px;
-}
-
-/* *** Dashboard: Team Cards *** */
-.team-list {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    margin-top: 20px;
-}
-
-.team-card {
-    background-color: rgba(86, 90, 112, 0.25);
-    border-radius: 10px;
-    padding: 16px 24px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-    text-align: left;
-}
-
-.team-card.status-running {
-    border: 2px solid #4caf50;
-}
-
-.team-card.status-pending {
-    border: 2px solid rgba(255, 255, 255, 0.3);
-}
-
-.team-card.status-stopped {
-    border: 2px solid #ffb300;
-}
-
-.team-card.status-scored {
-    border: 2px solid #0277bd;
-}
-
-.team-card-header {
-    display: flex;
-    flex-direction: column;
-    min-width: 160px;
-}
-
-.team-card-header-row {
-    width: 100%;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: baseline;
-}
-
-.team-card-name {
-    font-size: 24px;
-    font-weight: bold;
-    text-transform: capitalize;
-}
-
-.team-card-status {
-    font-size: 14px;
-    opacity: 0.8;
-}
-
-.team-card-timer {
-    font-size: 36px;
-    font-weight: bold;
-    font-variant-numeric: tabular-nums;
-    min-width: 160px;
-    text-align: center;
-}
-
-.team-card-controls {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-.team-card-controls button {
-    margin: 0;
-}
-
-.team-score-input {
-    width: 90px;
-}
-
-.team-final-score {
-    font-size: 22px;
-    display: inline;
-}
-
-.remove-btn {
-    background-color: #b71c1c;
-}
-
-.remove-btn:hover {
-    background-color: #7f1313;
-}
-
-button:disabled,
-button:disabled:hover {
-    background-color: #555 !important;
-    cursor: not-allowed;
-    opacity: 0.6;
-}
-
-/* *** Button Color Variants *** */
-.btn-green {
-    background-color: #43a047;
-}
-.btn-green:hover {
-    background-color: #2e7031;
-}
-
-.btn-neutral {
-    background-color: #546e7a;
-}
-.btn-neutral:hover {
-    background-color: #3b4d55;
-}
-
-/* *** Dashboard: Session Length Row (pre-start) *** */
-.duration-row {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
-.duration-label {
-    display: inline;
-    margin: 0;
-}
-
-.duration-input {
-    width: 80px;
-}
-
-/* *** Dashboard: Edit Time Modal *** */
-.level-input-row-centered {
-    justify-content: center;
-}
-
-.edit-time-input {
-    width: 100px;
-}
-
-/* *** Session Panel / Global Countdown *** */
-#session-panel {
-    margin-bottom: 20px;
-}
-
-#session-panel .timer {
-    font-size: clamp(40px, 8vw, 72px);
-    margin-bottom: 16px;
-    letter-spacing: 2px;
-}
-
-.timer-expired {
-    border-color: #b71c1c !important;
-    color: #ff8a80;
-    animation: pulseExpired 1s infinite;
-}
-
-@keyframes pulseExpired {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
-}
-
-/* *** Dashboard: Team Cards (level tracking) *** */
-.team-card-body {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-}
-
-.level-entry-panel {
-    width: 100%;
-    text-align: left;
-    margin: 10px 0;
-}
-
-.level-input-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-.level-input-row button {
-    margin: 0;
-}
-
-.level-list {
-    width: 100%;
-    text-align: left;
-    margin-top: 8px;
-    font-size: 16px;
-}
-
-.level-list-item {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.25);
-    padding: 4px 0;
-}
-
-.levels-complete-note {
-    margin: 8px 0;
-}
-
-.level-entry-label {
-    font-size: 16px;
-    margin: 4px 0;
-}
-
-.level-value-input {
-    width: 90px;
-}
-
-.level-total-line {
-    font-size: 15px;
-    opacity: 0.8;
-    margin-top: 6px;
-}
-
-.score-row {
-    margin-top: 14px;
-}
-
-.score-label {
-    font-size: 16px;
-    margin: 0;
-}
-
-.team-card-footer-actions {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-top: 10px;
-}
-
-.team-card-footer-actions button {
-    margin: 0;
-}
-
-/* *** Modal Overlay (Add Team / Edit Time) *** */
-.modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.65);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    z-index: 1000;
-}
-
-.modal-box {
-    background: #1b1f2e;
-    border: 2px solid #0277bd;
-    border-radius: 16px;
-    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
-    width: clamp(260px, 90vw, 420px);
-    aspect-ratio: 1 / 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 20px;
-    padding: clamp(16px, 5vw, 32px);
-    box-sizing: border-box;
-}
-
-.modal-box.wide {
-    aspect-ratio: auto;
-    padding: clamp(20px, 5vw, 36px) clamp(16px, 5vw, 32px);
-}
-
-.modal-title {
-    font-size: clamp(22px, 4vw, 32px);
-    margin: 0;
-}
-
-.modal-input {
-    width: 100%;
-    max-width: 260px;
-    text-align: center;
-    margin-top: 0;
-}
-
-.modal-buttons {
-    display: flex;
-    gap: 12px;
-    margin-top: 10px;
-    justify-content: center;
-}
-
-.modal-buttons button {
-    margin: 0;
-}
-
-@media (max-width: 500px) {
-    .modal-box {
-        aspect-ratio: auto;
-        width: 90vw;
+      if (team.levels.length === 0) {
+        levelsContainer.innerHTML = `<p class="text">No levels recorded for this team yet.</p>`;
+      }
     }
-}
 
-/* *** Edit Team Page *** */
-.edit-form-box {
-    max-width: 500px;
-    margin: 20px auto 0;
-    text-align: left;
-}
+    renderLevels();
 
-.edit-team-name {
-    text-align: center;
-    margin-bottom: 20px;
-}
+    function saveChanges() {
+      const valueInputs = document.querySelectorAll(".level-value");
+      const unitSelects = document.querySelectorAll(".level-unit");
 
-.edit-level-row {
-    margin-bottom: 10px;
-}
+      valueInputs.forEach(input => {
+        const i = parseInt(input.dataset.index, 10);
+        const value = parseFloat(input.value);
+        if (isNaN(value) || value < 0) {
+          alert(`Please enter a valid duration for Level ${i + 1}.`);
+          throw new Error("invalid input");
+        }
+        team.levels[i].value = value;
+      });
 
-.edit-level-label {
-    margin: 0;
-    min-width: 70px;
-}
+      unitSelects.forEach(select => {
+        const i = parseInt(select.dataset.index, 10);
+        const unit = select.value;
+        team.levels[i].unit = unit;
+      });
 
-.level-value {
-    width: 80px;
-}
+      team.levels.forEach(lvl => {
+        lvl.ms = lvl.value * UNIT_MS[lvl.unit];
+      });
 
-.edit-score-label {
-    display: block;
-    margin-top: 10px;
-}
+      const scoreInput = document.getElementById("score").value;
+      team.score = scoreInput === "" ? null : parseInt(scoreInput, 10);
 
-.edit-form-actions {
-    justify-content: center;
-    margin-top: 20px;
-}
-
-/* *** Fish Animation (Add_Name Page) *** */
-#containerFish {
-    position: relative;
-    margin: 0 auto;
-}
-
-#fish {
-    position: absolute;
-    top: 100px;
-    left: 0;
-    width: 200px;
-    height: 250px;
-    transition: transform 0.2s;
-}
-
-/* *** Fish & Envelope Animations (Scoreboard Page) *** */
-.fish {
-    float: right;
-    width: 170px;
-    height: 225px;
-    margin-top: 230px;
-    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
-    position: relative;
-    animation: shake 1.5s ease-in-out infinite;
-    transform-origin: center center;
-}
-
-.fish::after {
-    content: '';
-    position: absolute;
-    right: -20px;
-    top: 15px;
-    width: 20px;
-    height: 20px;
-    background: orange;
-    clip-path: polygon(0 0, 100% 50%, 0 100%);
-}
-
-.envelope {
-    float: left;
-    width: 140px;
-    height: 150px;
-    margin-top: 230px;
-    animation: shakeEnv 0.5s infinite;
-}
-
-/* *** Animations *** */
-@keyframes shake {
-    0%   { transform: rotate(0deg); }
-    10%  { transform: rotate(10deg); }
-    20%  { transform: rotate(-10deg); }
-    30%  { transform: rotate(12deg); }
-    40%  { transform: rotate(-12deg); }
-    50%  { transform: rotate(15deg); }
-    60%  { transform: rotate(-15deg); }
-    70%  { transform: rotate(12deg); }
-    80%  { transform: rotate(-10deg); }
-    90%  { transform: rotate(5deg); }
-    100% { transform: rotate(0deg); }
-}
-
-@keyframes shakeEnv {
-    0%, 100% { transform: translateY(0); }
-    50%      { transform: translateY(-10px); }
-}
+      localStorage.setItem(TEAMS_KEY, JSON.stringify(teams));
+      localStorage.removeItem("editTarget");
+      window.location.href = "scoreboard.html";
+    }
+  </script>
+</body>
+</html>

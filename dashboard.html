@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <title>Caught in the Phish - Dashboard</title>
+</head>
+<body>
+  <header>
+    <h1 class="title">
+      Cyber Security Awareness Month
+      <img src="images/Jack.png" class="logoBoard" alt="Logo">
+    </h1>
+    <h2 class="title">Caught in a Phish - Game Master Dashboard</h2>
+    <hr>
+  </header>
+
+  <main>
+    <!-- Global Session Clock -->
+    <div id="session-panel">
+      <div id="countdown-display" class="timer">00:45:00</div>
+
+      <div id="pre-start-duration" class="dashboard-actions duration-row">
+        <label class="text duration-label" for="durationInput">Length:</label>
+        <input type="number" id="durationInput" class="input duration-input" min="1" value="45">
+        <select id="durationUnit" class="input">
+          <option value="min" selected>Min</option>
+          <option value="sec">Sec</option>
+          <option value="hr">Hr</option>
+        </select>
+      </div>
+
+      <div class="dashboard-actions">
+        <button id="addTeamBtn" class="btn-green">Add team</button>
+        <button id="editTimeBtn" class="btn-neutral">Edit Time</button>
+        <button id="timeToggleBtn" class="btn-neutral">Start Time</button>
+        <button id="endGameBtn" class="remove-btn">End game</button>
+      </div>
+
+      <div id="post-end-controls" class="dashboard-actions" style="display:none;">
+        <button id="newSessionBtn">New Session (Reset)</button>
+      </div>
+    </div>
+
+    <div class="dashboard-actions">
+      <button onclick="window.location.href='scoreboard.html'">View Leaderboard</button>
+    </div>
+
+    <hr>
+
+    <!-- Live team cards -->
+    <div id="team-list" class="team-list"></div>
+  </main>
+
+  <!-- Add Team Modal -->
+  <div id="add-team-overlay" class="modal-overlay" style="display:none;">
+    <div class="modal-box">
+      <h2 class="modal-title">Add New Team</h2>
+      <form id="add-team-form">
+        <input class="inputName modal-input" type="text" id="teamNameInput" placeholder="Team name" required autocomplete="off">
+        <div class="modal-buttons">
+          <button type="submit">Add Team</button>
+          <button type="button" id="cancelAddTeam" class="remove-btn">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Edit Time Modal -->
+  <div id="edit-time-overlay" class="modal-overlay" style="display:none;">
+    <div class="modal-box wide">
+      <h2 class="modal-title">Edit Remaining Time</h2>
+      <form id="edit-time-form">
+        <div class="level-input-row level-input-row-centered">
+          <input type="number" id="editTimeValue" class="input edit-time-input" min="0">
+          <select id="editTimeUnit" class="input">
+            <option value="min" selected>Min</option>
+            <option value="sec">Sec</option>
+            <option value="hr">Hr</option>
+          </select>
+        </div>
+        <div class="modal-buttons">
+          <button type="submit">Save</button>
+          <button type="button" id="cancelEditTime" class="remove-btn">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const TEAMS_KEY = "teams";
+    const GAME_KEY = "game";
+    const MAX_LEVELS = 4;
+    const UNIT_MS = { sec: 1000, min: 60 * 1000, hr: 60 * 60 * 1000 };
+    const UNIT_LABEL = { sec: "sec", min: "min", hr: "hr" };
+
+    const teamList = document.getElementById("team-list");
+    const countdownDisplay = document.getElementById("countdown-display");
+    const preStartDuration = document.getElementById("pre-start-duration");
+    const durationInput = document.getElementById("durationInput");
+    const durationUnit = document.getElementById("durationUnit");
+    const timeToggleBtn = document.getElementById("timeToggleBtn");
+    const editTimeBtn = document.getElementById("editTimeBtn");
+    const endGameBtn = document.getElementById("endGameBtn");
+    const postEndControls = document.getElementById("post-end-controls");
+
+    const addTeamBtn = document.getElementById("addTeamBtn");
+    const addOverlay = document.getElementById("add-team-overlay");
+    const addTeamForm = document.getElementById("add-team-form");
+    const teamNameInput = document.getElementById("teamNameInput");
+    const cancelAddTeam = document.getElementById("cancelAddTeam");
+
+    const editTimeOverlay = document.getElementById("edit-time-overlay");
+    const editTimeForm = document.getElementById("edit-time-form");
+    const editTimeValue = document.getElementById("editTimeValue");
+    const editTimeUnit = document.getElementById("editTimeUnit");
+    const cancelEditTime = document.getElementById("cancelEditTime");
+
+    // Tracks which team's "record time" entry panel is expanded (UI-only, not persisted)
+    const openPanels = new Set();
+
+    // ---------- Storage helpers ----------
+    function getTeams() {
+      return JSON.parse(localStorage.getItem(TEAMS_KEY)) || [];
+    }
+    function saveTeams(teams) {
+      localStorage.setItem(TEAMS_KEY, JSON.stringify(teams));
+    }
+    function defaultGame() {
+      return { status: "not_started", durationMs: 45 * 60 * 1000, startTime: null, accumulatedMs: 0 };
+    }
+    function getGame() {
+      const g = JSON.parse(localStorage.getItem(GAME_KEY));
+      return g || defaultGame();
+    }
+    function saveGame(game) {
+      localStorage.setItem(GAME_KEY, JSON.stringify(game));
+    }
+    function uid() {
+      return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+    }
+
+    // ---------- Time helpers ----------
+    function elapsedMs(game) {
+      const running = game.status === "running" && game.startTime;
+      return game.accumulatedMs + (running ? Date.now() - game.startTime : 0);
+    }
+    function remainingMs(game) {
+      return game.durationMs - elapsedMs(game);
+    }
+    function formatHMS(ms) {
+      const clamped = Math.max(0, ms);
+      const totalSec = Math.floor(clamped / 1000);
+      const h = String(Math.floor(totalSec / 3600)).padStart(2, "0");
+      const m = String(Math.floor((totalSec % 3600) / 60)).padStart(2, "0");
+      const s = String(totalSec % 60).padStart(2, "0");
+      return `${h}:${m}:${s}`;
+    }
+    function toMs(value, unit) {
+      return (parseFloat(value) || 0) * UNIT_MS[unit];
+    }
+
+    // ---------- Add Team modal ----------
+    function openAddModal() {
+      addOverlay.style.display = "flex";
+      teamNameInput.value = "";
+      teamNameInput.focus();
+    }
+    function closeAddModal() { addOverlay.style.display = "none"; }
+    addTeamBtn.addEventListener("click", openAddModal);
+    cancelAddTeam.addEventListener("click", closeAddModal);
+    addOverlay.addEventListener("click", (e) => { if (e.target === addOverlay) closeAddModal(); });
+
+    addTeamForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const name = teamNameInput.value.trim();
+      if (!name) return;
+      const teams = getTeams();
+      teams.push({ id: uid(), name, levels: [], score: null });
+      saveTeams(teams);
+      closeAddModal();
+      render();
+    });
+
+    // ---------- Edit Time modal ----------
+    function openEditTimeModal() {
+      const game = getGame();
+      if (game.status !== "running" && game.status !== "paused") return;
+      editTimeValue.value = Math.round(remainingMs(game) / 60000);
+      editTimeUnit.value = "min";
+      editTimeOverlay.style.display = "flex";
+      editTimeValue.focus();
+    }
+    function closeEditTimeModal() { editTimeOverlay.style.display = "none"; }
+    editTimeBtn.addEventListener("click", openEditTimeModal);
+    cancelEditTime.addEventListener("click", closeEditTimeModal);
+    editTimeOverlay.addEventListener("click", (e) => { if (e.target === editTimeOverlay) closeEditTimeModal(); });
+
+    editTimeForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const newRemainingMs = toMs(editTimeValue.value, editTimeUnit.value);
+      const game = getGame();
+      game.durationMs = elapsedMs(game) + newRemainingMs;
+      saveGame(game);
+      closeEditTimeModal();
+      render();
+    });
+
+    // ---------- Global clock controls ----------
+    timeToggleBtn.addEventListener("click", () => {
+      const game = getGame();
+      if (game.status === "not_started") {
+        const minutes = toMs(durationInput.value || 45, durationUnit.value) / 60000;
+        saveGame({
+          status: "running",
+          durationMs: toMs(durationInput.value || 45, durationUnit.value),
+          startTime: Date.now(),
+          accumulatedMs: 0
+        });
+      } else if (game.status === "running") {
+        game.accumulatedMs = elapsedMs(game);
+        game.startTime = null;
+        game.status = "paused";
+        saveGame(game);
+      } else if (game.status === "paused") {
+        game.startTime = Date.now();
+        game.status = "running";
+        saveGame(game);
+      }
+      render();
+    });
+
+    endGameBtn.addEventListener("click", () => {
+      const game = getGame();
+      if (game.status === "not_started" || game.status === "ended") return;
+      if (!confirm("End the game? The countdown will stop.")) return;
+      game.accumulatedMs = elapsedMs(game);
+      game.startTime = null;
+      game.status = "ended";
+      saveGame(game);
+      render();
+    });
+
+    document.getElementById("newSessionBtn").addEventListener("click", () => {
+      if (!confirm("Start a new session? This resets the clock. Teams and their recorded times/scores stay on the leaderboard — use \"Reset Leaderboard\" on the leaderboard page to clear them.")) return;
+      saveGame(defaultGame());
+      render();
+    });
+
+    // ---------- Team actions ----------
+    function togglePanel(id) {
+      if (openPanels.has(id)) openPanels.delete(id);
+      else openPanels.add(id);
+      render();
+    }
+
+    function saveLevel(id) {
+      const teams = getTeams();
+      const team = teams.find(t => t.id === id);
+      if (!team || team.levels.length >= MAX_LEVELS) return;
+
+      const valueInput = document.getElementById(`level-value-${id}`);
+      const unitSelect = document.getElementById(`level-unit-${id}`);
+      const value = parseFloat(valueInput.value);
+      if (isNaN(value) || value < 0) {
+        alert("Please enter a valid duration.");
+        return;
+      }
+      const unit = unitSelect.value;
+      team.levels.push({ value, unit, ms: toMs(value, unit) });
+      saveTeams(teams);
+      openPanels.delete(id);
+      render();
+    }
+
+    function saveScore(id) {
+      const teams = getTeams();
+      const team = teams.find(t => t.id === id);
+      if (!team || team.levels.length < MAX_LEVELS) return;
+      const input = document.getElementById(`score-input-${id}`);
+      const score = parseInt(input.value, 10);
+      if (isNaN(score)) {
+        alert("Please enter a valid score.");
+        return;
+      }
+      team.score = score;
+      saveTeams(teams);
+      render();
+    }
+
+    function removeTeam(id) {
+      if (!confirm("Remove this team?")) return;
+      const teams = getTeams().filter(t => t.id !== id);
+      saveTeams(teams);
+      openPanels.delete(id);
+      render();
+    }
+
+    function removeLastLevel(id) {
+      const teams = getTeams();
+      const team = teams.find(t => t.id === id);
+      if (!team || team.levels.length === 0) return;
+      if (!confirm(`Remove Level ${team.levels.length} for ${team.name}?`)) return;
+      team.levels.pop();
+      saveTeams(teams);
+      render();
+    }
+
+    // ---------- Rendering ----------
+    function renderClockAndControls() {
+      const game = getGame();
+
+      if (game.status === "not_started") {
+        countdownDisplay.textContent = formatHMS(toMs(durationInput.value || 45, durationUnit.value));
+        countdownDisplay.classList.remove("timer-expired");
+        preStartDuration.style.display = "flex";
+        timeToggleBtn.textContent = "Start Time";
+        timeToggleBtn.disabled = false;
+        editTimeBtn.disabled = true;
+        endGameBtn.disabled = true;
+        postEndControls.style.display = "none";
+      } else if (game.status === "running" || game.status === "paused") {
+        const rem = remainingMs(game);
+        countdownDisplay.textContent = formatHMS(rem);
+        countdownDisplay.classList.toggle("timer-expired", rem <= 0);
+        preStartDuration.style.display = "none";
+        timeToggleBtn.textContent = game.status === "running" ? "Pause Time" : "Resume Time";
+        timeToggleBtn.disabled = false;
+        editTimeBtn.disabled = false;
+        endGameBtn.disabled = false;
+        postEndControls.style.display = "none";
+      } else if (game.status === "ended") {
+        countdownDisplay.textContent = formatHMS(remainingMs(game));
+        preStartDuration.style.display = "none";
+        timeToggleBtn.disabled = true;
+        editTimeBtn.disabled = true;
+        endGameBtn.disabled = true;
+        postEndControls.style.display = "block";
+      }
+    }
+
+    function render() {
+      renderClockAndControls();
+      const teams = getTeams();
+      teamList.innerHTML = "";
+
+      if (teams.length === 0) {
+        teamList.innerHTML = `<p class="text">No teams added yet. Click "Add team" to get started.</p>`;
+        return;
+      }
+
+      teams.forEach(team => {
+        const card = document.createElement("div");
+        card.className = "team-card";
+        const levelsDone = team.levels.length;
+        const panelOpen = openPanels.has(team.id);
+
+        let recordSection = "";
+        if (levelsDone >= MAX_LEVELS) {
+          recordSection = `<span class="text levels-complete-note">All ${MAX_LEVELS} levels recorded</span>`;
+        } else {
+          recordSection = `<button onclick="togglePanel('${team.id}')">${panelOpen ? "Cancel" : "Record Time"}</button>`;
+          if (panelOpen) {
+            recordSection += `
+              <div class="level-entry-panel">
+                <label class="text level-entry-label">Input Duration (Level ${levelsDone + 1})</label>
+                <div class="level-input-row">
+                  <input type="number" id="level-value-${team.id}" class="input level-value-input" min="0">
+                  <select id="level-unit-${team.id}" class="input">
+                    <option value="min" selected>Min</option>
+                    <option value="sec">Sec</option>
+                    <option value="hr">Hr</option>
+                  </select>
+                  <button onclick="saveLevel('${team.id}')">Save</button>
+                </div>
+              </div>
+            `;
+          }
+        }
+
+        // newest level first
+        const levelItems = [...team.levels].map((lvl, i) => {
+          const levelNum = i + 1;
+          return { levelNum, text: `Level ${levelNum}: ${lvl.value} ${UNIT_LABEL[lvl.unit]}${lvl.value === 1 ? "" : "s"}` };
+        }).reverse();
+
+        const levelListHtml = levelItems.length
+          ? `<div class="level-list">${levelItems.map(li => `<div class="level-list-item">${li.text}</div>`).join("")}</div>`
+          : "";
+
+        const totalMs = team.levels.reduce((sum, lvl) => sum + lvl.ms, 0);
+        const totalLine = levelsDone > 0
+          ? `<div class="text level-total-line">Total: ${formatHMS(totalMs)}</div>`
+          : "";
+
+        // Score entry only becomes available once all levels (including Level 4) are recorded
+        const scoreSection = levelsDone >= MAX_LEVELS ? `
+          <div class="level-input-row score-row">
+            <label class="text score-label">Score:</label>
+            <input type="number" id="score-input-${team.id}" class="input team-score-input" min="0" value="${team.score ?? ""}" placeholder="--">
+            <button onclick="saveScore('${team.id}')">Save</button>
+          </div>
+        ` : "";
+
+        card.innerHTML = `
+          <div class="team-card-header team-card-header-row">
+            <span class="team-card-name">${team.name}</span>
+            <span class="team-card-status">Level ${levelsDone}/${MAX_LEVELS}</span>
+          </div>
+          <div class="team-card-body">
+            ${recordSection}
+            ${levelListHtml}
+            ${totalLine}
+            ${scoreSection}
+            <div class="team-card-footer-actions">
+              ${levelsDone > 0 ? `<button class="btn-neutral" onclick="removeLastLevel('${team.id}')">Undo Last Level</button>` : ""}
+              <button class="remove-btn" onclick="removeTeam('${team.id}')">Remove Team</button>
+            </div>
+          </div>
+        `;
+        teamList.appendChild(card);
+      });
+    }
+
+    setInterval(renderClockAndControls, 1000);
+
+    durationInput.addEventListener("input", () => {
+      if (getGame().status === "not_started") renderClockAndControls();
+    });
+    durationUnit.addEventListener("change", () => {
+      if (getGame().status === "not_started") renderClockAndControls();
+    });
+
+    window.addEventListener("storage", (e) => {
+      if (e.key === TEAMS_KEY || e.key === GAME_KEY) render();
+    });
+
+    render();
+  </script>
+</body>
+</html>

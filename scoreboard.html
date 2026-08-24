@@ -18,137 +18,171 @@
       Leaderboard
       <img src="images/Jack.png" class="logoBoard" alt="Logo">
     </h1>
-    <h2 class="title">Cybersecurity Awareness Month - Caught In The Phish Escape Room</h2>
+    <h2 class="title">Cyber Security Awareness Month - Caught in a Phish Escape Room</h2>
     <hr>
 
+    <h2 class="board-heading">Fastest Time <span class="board-heading-note">(all 4 levels completed)</span></h2>
     <table>
       <thead>
         <tr>
           <th>Rank</th>
           <th>Name</th>
-          <th>Time</th>
+          <th>Total Time</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="time-table-body"></tbody>
+    </table>
+
+    <h2 class="board-heading board-heading-spaced">Highest Score</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Name</th>
           <th>Score</th>
           <th></th>
         </tr>
       </thead>
-      <tbody id="table-body"></tbody>
+      <tbody id="score-table-body"></tbody>
     </table>
 
     <div class="buttons">
-      <button onclick="newGame()">Add New Team</button>
+      <button onclick="newGame()">Create New Session</button>
       <button id="resetBtn">Reset Leaderboard</button>
-      <button id="submitLeaderboard">Save Leaderboard</button>
+      <button id="submitLeaderboard">Export Leaderboard</button>
     </div>
   </main>
 
   <script>
-    const tbody = document.getElementById("table-body");
-    const resetBtn = document.getElementById("resetBtn");
-    const data = JSON.parse(localStorage.getItem("entries")) || [];
+    const TEAMS_KEY = "teams";
+    const MAX_LEVELS = 4;
 
-    function timeToSeconds(time) {
-      const [h, m, s] = time.split(":").map(Number);
-      return h * 3600 + m * 60 + s;
+    const timeBody = document.getElementById("time-table-body");
+    const scoreBody = document.getElementById("score-table-body");
+    const resetBtn = document.getElementById("resetBtn");
+
+    function getTeams() {
+      return JSON.parse(localStorage.getItem(TEAMS_KEY)) || [];
     }
 
-    function formatTime(time) {
-      return time.split(":").map(num => String(Number(num)).padStart(2, '0')).join(":");
+    function totalMs(team) {
+      return team.levels.reduce((sum, lvl) => sum + lvl.ms, 0);
+    }
+
+    function formatHMS(ms) {
+      const totalSec = Math.max(0, Math.floor(ms / 1000));
+      const h = String(Math.floor(totalSec / 3600)).padStart(2, "0");
+      const m = String(Math.floor((totalSec % 3600) / 60)).padStart(2, "0");
+      const s = String(totalSec % 60).padStart(2, "0");
+      return `${h}:${m}:${s}`;
     }
 
     function newGame() {
-    window.location.href = "index.html";
+      window.location.href = "dashboard.html";
     }
-    
 
     resetBtn.addEventListener("click", () => {
-      if (confirm("Are you sure you want to reset the leaderboard?")) {
-        localStorage.removeItem("entries");
-        location.reload();
+      if (confirm("Are you sure you want to reset the leaderboard? This removes all teams.")) {
+        localStorage.removeItem(TEAMS_KEY);
+        render();
       }
     });
 
-    function editEntry(name) {
-    const entries = JSON.parse(localStorage.getItem("entries")) || [];
-    const entry = entries.find(e => e.name === name);
-
-    if (!entry) {
-      alert("Entry not found.");
-      return;
+    function goToEdit(id) {
+      localStorage.setItem("editTarget", id);
+      window.location.href = "edit_score.html";
     }
 
-    const newScore = prompt(`Edit score for ${entry.name}:`, entry.score);
-    const newTime = prompt(`Edit time (HH:MM:SS) for ${entry.name}:`, entry.time);
+    document.getElementById("submitLeaderboard").addEventListener("click", submitToGoogleSheet);
 
-    if (newScore === null || newTime === null) return;
+    function submitToGoogleSheet() {
+      const teams = getTeams();
+      if (teams.length === 0) {
+        alert("No teams to submit.");
+        return;
+      }
 
-    const scoreNum = parseInt(newScore, 10);
-    const timeRegex = /^\d{2}:\d{2}:\d{2}$/;
+      const sheetURL = "https://script.google.com/macros/s/AKfycbzOWkugvSGv5VI5l9ywSXxZWag_wBRENS3-CrYXH3WY-WUNel8c0anOuyNjsOsASfIq/exec";
 
-    if (isNaN(scoreNum) || !timeRegex.test(newTime)) {
-      alert("Invalid input. Score must be a number, time must be in HH:MM:SS format.");
-      return;
-    }
-
-  // Update the entry
-    entry.score = scoreNum;
-    entry.time = newTime;
-
-  // Save back to localStorage
-    localStorage.setItem("entries", JSON.stringify(entries));
-    location.reload(); // refresh to update table
-  }
-
-
-    // Sort: score descending, then time ascending
-  data.sort((a, b) => b.score - a.score || timeToSeconds(a.time) - timeToSeconds(b.time));
-
-    data.forEach((entry, index) => {
-    const row = document.createElement("tr");
-    if (index === 0) row.classList.add("first-place");
-    else if (index === 1) row.classList.add("second-place");
-    else if (index === 2) row.classList.add("third-place");
-
-    row.innerHTML = `
-      <td>${index + 1}</td>
-      <td>${entry.name}</td>
-      <td>${formatTime(entry.time)}</td>
-      <td>${entry.score}</td>
-      <td><button onclick="goToEdit('${entry.name}')" class="edit_button"><img src="images/edit-white-icon.png" class="edit_image" alt="Edit"></button></td>
-    `;
-    tbody.appendChild(row);
-  });
-
-  function goToEdit(name) {
-    localStorage.setItem("editTarget", name);
-    window.location.href = "edit_score.html";
-  }
-
-  document.getElementById("submitLeaderboard").addEventListener("click", submitToGoogleSheet);
-
-  function submitToGoogleSheet() {
-    const entries = JSON.parse(localStorage.getItem("entries")) || [];
-    if (entries.length === 0) {
-      alert("No entries to submit.");
-      return;
-    }
-
-    const sheetURL = "https://script.google.com/macros/s/AKfycbzOWkugvSGv5VI5l9ywSXxZWag_wBRENS3-CrYXH3WY-WUNel8c0anOuyNjsOsASfIq/exec";
-
-    entries.forEach(entry => {
-      fetch(sheetURL, {
-        method: "POST",
-        mode: "no-cors",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(entry)
+      teams.forEach(team => {
+        fetch(sheetURL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: team.name,
+            time: formatHMS(totalMs(team)),
+            levelsCompleted: team.levels.length,
+            score: team.score
+          })
+        });
       });
+
+      alert("Leaderboard submitted to Google Sheets!");
+    }
+
+    function medalClass(index) {
+      if (index === 0) return "first-place";
+      if (index === 1) return "second-place";
+      if (index === 2) return "third-place";
+      return "";
+    }
+
+    function render() {
+      const teams = getTeams();
+
+      // --- Fastest Time board: only teams that finished all 4 levels ---
+      const finished = teams.filter(t => t.levels.length === MAX_LEVELS);
+      finished.sort((a, b) => totalMs(a) - totalMs(b));
+
+      timeBody.innerHTML = "";
+      if (finished.length === 0) {
+        timeBody.innerHTML = `<tr><td colspan="4">No teams have completed all ${MAX_LEVELS} levels yet.</td></tr>`;
+      } else {
+        finished.forEach((team, index) => {
+          const row = document.createElement("tr");
+          const cls = medalClass(index);
+          if (cls) row.classList.add(cls);
+          row.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${team.name}</td>
+            <td>${formatHMS(totalMs(team))}</td>
+            <td><button onclick="goToEdit('${team.id}')" class="edit_button"><img src="images/edit-white-icon.png" class="edit_image" alt="Edit"></button></td>
+          `;
+          timeBody.appendChild(row);
+        });
+      }
+
+      // --- Highest Score board: any team with a score entered ---
+      const scored = teams.filter(t => t.score !== null && t.score !== undefined);
+      scored.sort((a, b) => b.score - a.score);
+
+      scoreBody.innerHTML = "";
+      if (scored.length === 0) {
+        scoreBody.innerHTML = `<tr><td colspan="4">No scores entered yet.</td></tr>`;
+      } else {
+        scored.forEach((team, index) => {
+          const row = document.createElement("tr");
+          const cls = medalClass(index);
+          if (cls) row.classList.add(cls);
+          row.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${team.name}</td>
+            <td>${team.score}</td>
+            <td><button onclick="goToEdit('${team.id}')" class="edit_button"><img src="images/edit-white-icon.png" class="edit_image" alt="Edit"></button></td>
+          `;
+          scoreBody.appendChild(row);
+        });
+      }
+    }
+
+    window.addEventListener("storage", (e) => {
+      if (e.key === TEAMS_KEY) render();
     });
+    setInterval(render, 3000);
 
-    alert("Leaderboard submitted to Google Sheets!");
-  }
-
-
+    render();
   </script>
-  </body>
+</body>
 </html>

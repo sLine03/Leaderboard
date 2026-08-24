@@ -20,16 +20,11 @@
   <main class="dashboard-main">
     <!-- Global Session Clock -->
     <div id="session-panel">
-      <div id="countdown-display" class="timer">45:00</div>
+      <div id="countdown-display" class="timer">00:45:00</div>
 
       <div id="pre-start-duration" class="dashboard-actions duration-row">
-        <label class="text duration-label" for="durationInput">Length:</label>
-        <input type="number" id="durationInput" class="input duration-input" min="1" value="45">
-        <select id="durationUnit" class="input">
-          <option value="min" selected>Min</option>
-          <option value="sec">Sec</option>
-          <option value="hr">Hr</option>
-        </select>
+        <label class="text duration-label" for="durationInput">Length (M:SS):</label>
+        <input type="text" id="durationInput" class="input duration-input" placeholder="45:00" value="45:00" inputmode="numeric">
       </div>
 
       <div class="dashboard-actions">
@@ -74,12 +69,7 @@
       <h2 class="modal-title">Edit Remaining Time</h2>
       <form id="edit-time-form">
         <div class="level-input-row level-input-row-centered">
-          <input type="number" id="editTimeValue" class="input edit-time-input" min="0">
-          <select id="editTimeUnit" class="input">
-            <option value="min" selected>Min</option>
-            <option value="sec">Sec</option>
-            <option value="hr">Hr</option>
-          </select>
+          <input type="text" id="editTimeValue" class="input edit-time-input" placeholder="M:SS" inputmode="numeric">
         </div>
         <div class="modal-buttons">
           <button type="submit">Save</button>
@@ -93,14 +83,11 @@
     const TEAMS_KEY = "teams";
     const GAME_KEY = "game";
     const MAX_LEVELS = 4;
-    const UNIT_MS = { sec: 1000, min: 60 * 1000, hr: 60 * 60 * 1000 };
-    const UNIT_LABEL = { sec: "sec", min: "min", hr: "hr" };
 
     const teamList = document.getElementById("team-list");
     const countdownDisplay = document.getElementById("countdown-display");
     const preStartDuration = document.getElementById("pre-start-duration");
     const durationInput = document.getElementById("durationInput");
-    const durationUnit = document.getElementById("durationUnit");
     const timeToggleBtn = document.getElementById("timeToggleBtn");
     const editTimeBtn = document.getElementById("editTimeBtn");
     const endGameBtn = document.getElementById("endGameBtn");
@@ -115,7 +102,6 @@
     const editTimeOverlay = document.getElementById("edit-time-overlay");
     const editTimeForm = document.getElementById("edit-time-form");
     const editTimeValue = document.getElementById("editTimeValue");
-    const editTimeUnit = document.getElementById("editTimeUnit");
     const cancelEditTime = document.getElementById("cancelEditTime");
 
     // Tracks which team's "record time" entry panel is expanded (UI-only, not persisted)
@@ -158,8 +144,29 @@
       const s = String(totalSec % 60).padStart(2, "0");
       return `${h}:${m}:${s}`;
     }
-    function toMs(value, unit) {
-      return (parseFloat(value) || 0) * UNIT_MS[unit];
+    // Accepts "M:SS" (e.g. "1:30") or "H:MM:SS". Returns ms, or null if unparsable.
+    function parseDuration(str) {
+      if (str == null) return null;
+      const trimmed = String(str).trim();
+      if (!trimmed) return null;
+      const parts = trimmed.split(":");
+      if (parts.length < 1 || parts.length > 3 || parts.some(p => !/^\d+(\.\d+)?$/.test(p))) return null;
+      let h = 0, m = 0, s = 0;
+      if (parts.length === 1) {
+        m = parseFloat(parts[0]);
+      } else if (parts.length === 2) {
+        [m, s] = parts.map(parseFloat);
+      } else {
+        [h, m, s] = parts.map(parseFloat);
+      }
+      return (h * 3600 + m * 60 + s) * 1000;
+    }
+    // Formats ms as "M:SS" (minutes not zero-padded, seconds always 2 digits)
+    function formatDuration(ms) {
+      const totalSec = Math.round(Math.max(0, ms) / 1000);
+      const m = Math.floor(totalSec / 60);
+      const s = totalSec % 60;
+      return `${m}:${String(s).padStart(2, "0")}`;
     }
 
     // ---------- Add Team modal ----------
@@ -188,8 +195,7 @@
     function openEditTimeModal() {
       const game = getGame();
       if (game.status !== "running" && game.status !== "paused") return;
-      editTimeValue.value = Math.round(remainingMs(game) / 60000);
-      editTimeUnit.value = "min";
+      editTimeValue.value = formatDuration(remainingMs(game));
       editTimeOverlay.style.display = "flex";
       editTimeValue.focus();
     }
@@ -200,7 +206,11 @@
 
     editTimeForm.addEventListener("submit", (e) => {
       e.preventDefault();
-      const newRemainingMs = toMs(editTimeValue.value, editTimeUnit.value);
+      const newRemainingMs = parseDuration(editTimeValue.value);
+      if (newRemainingMs == null || newRemainingMs < 0) {
+        alert("Please enter a valid time in M:SS format (e.g. 1:30).");
+        return;
+      }
       const game = getGame();
       game.durationMs = elapsedMs(game) + newRemainingMs;
       saveGame(game);
@@ -212,10 +222,14 @@
     timeToggleBtn.addEventListener("click", () => {
       const game = getGame();
       if (game.status === "not_started") {
-        const minutes = toMs(durationInput.value || 45, durationUnit.value) / 60000;
+        const durationMs = parseDuration(durationInput.value);
+        if (durationMs == null || durationMs <= 0) {
+          alert("Please enter a valid session length in M:SS format (e.g. 45:00).");
+          return;
+        }
         saveGame({
           status: "running",
-          durationMs: toMs(durationInput.value || 45, durationUnit.value),
+          durationMs,
           startTime: Date.now(),
           accumulatedMs: 0
         });
@@ -262,14 +276,12 @@
       if (!team || team.levels.length >= MAX_LEVELS) return;
 
       const valueInput = document.getElementById(`level-value-${id}`);
-      const unitSelect = document.getElementById(`level-unit-${id}`);
-      const value = parseFloat(valueInput.value);
-      if (isNaN(value) || value < 0) {
-        alert("Please enter a valid duration.");
+      const ms = parseDuration(valueInput.value);
+      if (ms == null || ms < 0) {
+        alert("Please enter a valid duration in M:SS format (e.g. 1:30).");
         return;
       }
-      const unit = unitSelect.value;
-      team.levels.push({ value, unit, ms: toMs(value, unit) });
+      team.levels.push({ ms });
       saveTeams(teams);
       openPanels.delete(id);
       render();
@@ -313,7 +325,7 @@
       const game = getGame();
 
       if (game.status === "not_started") {
-        countdownDisplay.textContent = formatHMS(toMs(durationInput.value || 45, durationUnit.value));
+        countdownDisplay.textContent = formatHMS(parseDuration(durationInput.value) ?? 45 * 60 * 1000);
         countdownDisplay.classList.remove("timer-expired");
         preStartDuration.style.display = "flex";
         timeToggleBtn.textContent = "Start Time";
@@ -365,14 +377,9 @@
           if (panelOpen) {
             recordSection += `
               <div class="level-entry-panel">
-                <label class="text level-entry-label">Input Duration (Level ${levelsDone + 1})</label>
+                <label class="text level-entry-label">Input Duration (Level ${levelsDone + 1}) — M:SS</label>
                 <div class="level-input-row">
-                  <input type="number" id="level-value-${team.id}" class="input level-value-input" min="0">
-                  <select id="level-unit-${team.id}" class="input">
-                    <option value="min" selected>Min</option>
-                    <option value="sec">Sec</option>
-                    <option value="hr">Hr</option>
-                  </select>
+                  <input type="text" id="level-value-${team.id}" class="input level-value-input" placeholder="1:30" inputmode="numeric">
                   <button onclick="saveLevel('${team.id}')">Save</button>
                 </div>
               </div>
@@ -383,7 +390,7 @@
         // newest level first
         const levelItems = [...team.levels].map((lvl, i) => {
           const levelNum = i + 1;
-          return { levelNum, text: `Level ${levelNum}: ${lvl.value} ${UNIT_LABEL[lvl.unit]}${lvl.value === 1 ? "" : "s"}` };
+          return { levelNum, text: `Level ${levelNum}: ${formatDuration(lvl.ms)}` };
         }).reverse();
 
         const levelListHtml = levelItems.length
@@ -427,9 +434,6 @@
     setInterval(renderClockAndControls, 1000);
 
     durationInput.addEventListener("input", () => {
-      if (getGame().status === "not_started") renderClockAndControls();
-    });
-    durationUnit.addEventListener("change", () => {
       if (getGame().status === "not_started") renderClockAndControls();
     });
 

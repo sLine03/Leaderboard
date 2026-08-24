@@ -36,7 +36,31 @@
 
   <script>
     const TEAMS_KEY = "teams";
-    const UNIT_MS = { sec: 1000, min: 60 * 1000, hr: 60 * 60 * 1000 };
+
+    // Accepts "M:SS" (e.g. "1:30") or "H:MM:SS". Returns ms, or null if unparsable.
+    function parseDuration(str) {
+      if (str == null) return null;
+      const trimmed = String(str).trim();
+      if (!trimmed) return null;
+      const parts = trimmed.split(":");
+      if (parts.length < 1 || parts.length > 3 || parts.some(p => !/^\d+(\.\d+)?$/.test(p))) return null;
+      let h = 0, m = 0, s = 0;
+      if (parts.length === 1) {
+        m = parseFloat(parts[0]);
+      } else if (parts.length === 2) {
+        [m, s] = parts.map(parseFloat);
+      } else {
+        [h, m, s] = parts.map(parseFloat);
+      }
+      return (h * 3600 + m * 60 + s) * 1000;
+    }
+    // Formats ms as "M:SS" (minutes not zero-padded, seconds always 2 digits)
+    function formatDuration(ms) {
+      const totalSec = Math.round(Math.max(0, ms) / 1000);
+      const m = Math.floor(totalSec / 60);
+      const s = totalSec % 60;
+      return `${m}:${String(s).padStart(2, "0")}`;
+    }
 
     const targetId = localStorage.getItem("editTarget");
     const teams = JSON.parse(localStorage.getItem(TEAMS_KEY)) || [];
@@ -59,12 +83,7 @@
         row.className = "level-input-row edit-level-row";
         row.innerHTML = `
           <label class="text edit-level-label">Level ${i + 1}:</label>
-          <input type="number" class="input level-value" min="0" value="${lvl.value}" data-index="${i}">
-          <select class="input level-unit" data-index="${i}">
-            <option value="min" ${lvl.unit === "min" ? "selected" : ""}>Min</option>
-            <option value="sec" ${lvl.unit === "sec" ? "selected" : ""}>Sec</option>
-            <option value="hr" ${lvl.unit === "hr" ? "selected" : ""}>Hr</option>
-          </select>
+          <input type="text" class="input level-value" placeholder="1:30" value="${formatDuration(lvl.ms)}" data-index="${i}">
         `;
         levelsContainer.appendChild(row);
       });
@@ -78,26 +97,15 @@
 
     function saveChanges() {
       const valueInputs = document.querySelectorAll(".level-value");
-      const unitSelects = document.querySelectorAll(".level-unit");
 
       valueInputs.forEach(input => {
         const i = parseInt(input.dataset.index, 10);
-        const value = parseFloat(input.value);
-        if (isNaN(value) || value < 0) {
-          alert(`Please enter a valid duration for Level ${i + 1}.`);
+        const ms = parseDuration(input.value);
+        if (ms == null || ms < 0) {
+          alert(`Please enter a valid duration for Level ${i + 1} (e.g. 1:30).`);
           throw new Error("invalid input");
         }
-        team.levels[i].value = value;
-      });
-
-      unitSelects.forEach(select => {
-        const i = parseInt(select.dataset.index, 10);
-        const unit = select.value;
-        team.levels[i].unit = unit;
-      });
-
-      team.levels.forEach(lvl => {
-        lvl.ms = lvl.value * UNIT_MS[lvl.unit];
+        team.levels[i].ms = ms;
       });
 
       const scoreInput = document.getElementById("score").value;

@@ -8,7 +8,7 @@
 /* *** Base Styles *** */
 body {
     font-family: 'Titillium Web', sans-serif;
-    background: url('images/SAIT_BG_Blue.jpg') no-repeat center center fixed;
+    background: url('images/Plain_Background.png') no-repeat center center fixed;
     background-size: cover;
     padding: 40px;
     text-align: center;

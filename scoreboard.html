@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="styles.css">
   <title>Caught in the Phish - Leaderboard</title>
 </head>
-<body>
+<body style="background-image: url('images/jackal_background.png'); background-size: cover; background-position: center; background-repeat: no-repeat;">
   <header>
     <img src="images/GoldfishStickers.png" class="fish" alt="Decorative Fish">
     <img src="images/envelope.png" class="envelope" alt="Envelope">
@@ -16,7 +16,6 @@
   <main>
     <h1 class="title">
       Leaderboard
-      <img src="images/Jack.png" class="logoBoard" alt="Logo">
     </h1>
     <h2 class="title">Cyber Security Awareness Month - Caught in a Phish Escape Room</h2>
     <hr>
@@ -138,7 +137,7 @@
 
       timeBody.innerHTML = "";
       if (finished.length === 0) {
-        timeBody.innerHTML = `<tr><td colspan="4">No teams have completed all ${MAX_LEVELS} levels yet.</td></tr>`;
+        timeBody.innerHTML = `<tr><td colspan="4" style="color: rgba(255, 255, 255, 0.6);">No teams have completed all ${MAX_LEVELS} levels yet.</td></tr>`;
       } else {
         finished.forEach((team, index) => {
           const row = document.createElement("tr");
@@ -160,7 +159,7 @@
 
       scoreBody.innerHTML = "";
       if (scored.length === 0) {
-        scoreBody.innerHTML = `<tr><td colspan="4">No scores entered yet.</td></tr>`;
+        scoreBody.innerHTML = `<tr><td colspan="4" style="color: rgba(255, 255, 255, 0.6);">No scores entered yet.</td></tr>`;
       } else {
         scored.forEach((team, index) => {
           const row = document.createElement("tr");

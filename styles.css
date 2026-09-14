@@ -8,9 +8,9 @@
 /* *** Base Styles *** */
 body {
     font-family: 'Titillium Web', sans-serif;
-    background: url('images/Plain_Background.png') no-repeat center center fixed;
+    background: url('images/plain_background.png') no-repeat center center fixed;
     background-size: cover;
-    padding: 40px;
+    padding: 50px;
     text-align: center;
     color: white;
 }
@@ -219,7 +219,7 @@ select.input {
     padding: 10px;
     width: 70%;
     margin: 0 auto;
-    border: 2px solid white;
+    border: 2px solid rgba(255, 255, 255, 0.322);
     border-radius: 20px;
     background: transparent;
     color: white;
@@ -308,7 +308,7 @@ button:hover {
 }
 
 .team-card {
-    background-color: rgba(86, 90, 112, 0.25);
+    background-color: rgba(59, 63, 82, 0.384);
     border-radius: 10px;
     padding: 16px 24px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -548,7 +548,7 @@ button:disabled:hover {
 .modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.65);
+    background: rgba(0, 0, 0, 0.80);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -558,9 +558,9 @@ button:disabled:hover {
 
 .modal-box {
     background: #1b1f2e;
-    border: 2px solid #0277bd;
+    border: 2px solid #946fce;
     border-radius: 16px;
-    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.521);
     width: clamp(260px, 90vw, 420px);
     aspect-ratio: 1 / 1;
     display: flex;

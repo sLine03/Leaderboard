@@ -21,7 +21,6 @@
     <hr>
 
     <h2 class="board-heading">Fastest Time <span class="board-heading-note">(all 4 levels completed)</span></h2>
-    <button onclick="toggle();">Edit Scores</button>
     <table>
       <thead>
         <tr>
@@ -148,7 +147,7 @@
             <td>${index + 1}</td>
             <td>${team.name}</td>
             <td>${formatHMS(totalMs(team))}</td>
-            <td><button id="edit-btn-${team.id}" onclick="goToEdit('${team.id}')" class="edit_button"><img src="images/edit-white-icon.png" class="edit_image" alt="Edit"></button></td>
+            <td><button onclick="goToEdit('${team.id}')" class="edit_button"><img src="images/edit-white-icon.png" class="edit_image" alt="Edit"></button></td>
           `;
           timeBody.appendChild(row);
         });
@@ -183,18 +182,6 @@
     setInterval(render, 3000);
 
     render();
-    
-    let toggle = () => {
-
-    let element = document.getElementById("edit-btn");
-    let hidden = element.getAttribute("hidden");
-
-    if (hidden) {
-       element.removeAttribute("hidden");
-    } else {
-       element.setAttribute("hidden", "hidden");
-    }
-  }
   </script>
 </body>
 </html>

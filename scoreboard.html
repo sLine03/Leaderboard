@@ -185,15 +185,14 @@
     render();
     
     let toggle = () => {
+      let element = document.getElementById("edit-btn");
+      let hidden = element.getAttribute("hidden");
 
-    let element = document.getElementById("edit-btn");
-    let hidden = element.getAttribute("hidden");
-
-    if (hidden) {
-       element.removeAttribute("hidden");
-    } else {
-       element.setAttribute("hidden", "hidden");
-    }
+      if (hidden) {
+        element.removeAttribute("hidden");
+      } else {
+        element.setAttribute("hidden", "hidden");
+      }
   }
   </script>
 </body>

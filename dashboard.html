@@ -306,6 +306,19 @@
       render();
     }
 
+    // Grey out the score's Save button while the input matches the saved score;
+    // re-enable it as soon as the admin edits the value.
+    function updateScoreButton(id) {
+      const team = getTeams().find(t => t.id === id);
+      const input = document.getElementById(`score-input-${id}`);
+      const btn = document.getElementById(`score-save-${id}`);
+      if (!team || !input || !btn) return;
+      const unchanged = team.score !== null && team.score !== undefined &&
+                        String(team.score) === input.value.trim();
+      btn.disabled = unchanged;
+      btn.textContent = unchanged ? "Saved" : "Save";
+    }
+
     function saveScore(id) {
       const teams = getTeams();
       const team = teams.find(t => t.id === id);
@@ -424,11 +437,13 @@
           : "";
 
         // Score entry only becomes available once all levels (including Level 4) are recorded
+        // Once a score is saved the button turns grey (disabled) until the score is changed
+        const scoreSaved = team.score !== null && team.score !== undefined;
         const scoreSection = levelsDone >= MAX_LEVELS ? `
           <div class="level-input-row score-row">
             <label class="text score-label">Score:</label>
-            <input type="number" id="score-input-${team.id}" class="input team-score-input" min="0" value="${team.score ?? ""}" placeholder="--">
-            <button onclick="saveScore('${team.id}')">Save</button>
+            <input type="number" id="score-input-${team.id}" class="input team-score-input" min="0" value="${team.score ?? ""}" placeholder="--" oninput="updateScoreButton('${team.id}')">
+            <button id="score-save-${team.id}" onclick="saveScore('${team.id}')" ${scoreSaved ? "disabled" : ""}>${scoreSaved ? "Saved" : "Save"}</button>
           </div>
         ` : "";
 

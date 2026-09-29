@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <title>Caught in the Phish - Display</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* Everything is sized in rem and html scales with the screen width, so it reads well on a TV */
+    html { font-size: clamp(14px, 1.5vw, 32px); }
+
+    body {
+      font-family: 'Titillium Web', sans-serif;
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 1.5rem 3rem 2rem;
+      background: url('images/jackal_background.png') center / cover no-repeat fixed;
+    }
+
+    /* ---- Header ---- */
+    .d-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+      padding-bottom: 0.6rem;
+    }
+    .d-title { font-size: 2.2rem; font-weight: 700; display: flex; align-items: center; gap: 1rem; }
+    .d-title img { height: 3rem; }
+    .d-subtitle { font-size: 1.1rem; opacity: 0.85; }
+    .d-back { color: white; opacity: 0.6; font-size: 0.9rem; text-decoration: none; }
+    .d-back:hover { opacity: 1; text-decoration: underline; }
+
+    /* ---- Slides ---- */
+    #stage { flex: 1; display: flex; align-items: center; justify-content: center; }
+    .slide { display: none; width: 100%; max-width: 62rem; text-align: center; }
+    .slide.active { display: block; animation: fadeIn 0.6s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(0.6rem); } to { opacity: 1; transform: none; } }
+
+    .slide h2 { font-size: 2.6rem; margin-bottom: 0.3rem; }
+    .slide .note { font-size: 1.1rem; opacity: 0.75; margin-bottom: 1.5rem; }
+
+    /* ---- Champions slide ---- */
+    .champs { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 1.5rem; }
+    .champ {
+      background: rgba(59, 63, 82, 0.6);
+      border: 3px solid #798fc0;
+      border-radius: 1rem;
+      padding: 2rem 1.5rem;
+    }
+    .champ-label { font-size: 1.2rem; text-transform: uppercase; letter-spacing: 0.15em; opacity: 0.85; }
+    .champ-name  { font-size: 3rem; font-weight: 700; margin: 0.8rem 0 0.4rem; overflow-wrap: anywhere; }
+    .champ-value { font-size: 2.6rem; color: #798fc0; font-weight: 600; }
+
+    /* ---- Board slides ---- */
+    .d-rows { display: flex; flex-direction: column; gap: 0.7rem; margin-top: 1rem; }
+    .d-row {
+      display: grid;
+      grid-template-columns: 4rem 1fr auto;
+      align-items: center;
+      gap: 1rem;
+      text-align: left;
+      background: rgba(59, 63, 82, 0.6);
+      border-left: 0.5rem solid rgba(255, 255, 255, 0.25);
+      border-radius: 0.6rem;
+      padding: 0.8rem 1.5rem;
+      font-size: 1.8rem;
+    }
+    .d-rank  { font-weight: 700; text-align: center; }
+    .d-name  { overflow-wrap: anywhere; }
+    .d-value { font-weight: 600; font-variant-numeric: tabular-nums; }
+    .d-row.r1 { border-left-color: #798fc0; }
+    .d-row.r1 .d-rank { color: #798fc0; }
+    .d-row.r2 { border-left-color: #cfd8dc; }
+    .d-row.r2 .d-rank { color: #cfd8dc; }
+    .d-row.r3 { border-left-color: #798fc0; }
+    .d-row.r3 .d-rank { color: #798fc0; }
+    .d-empty { font-size: 1.6rem; opacity: 0.7; margin-top: 2rem; }
+
+    /* ---- Footer: slide dots + countdown bar ---- */
+    .d-footer { display: flex; flex-direction: column; align-items: center; gap: 0.8rem; }
+    #dots { display: flex; gap: 0.8rem; }
+    #dots button {
+      width: 0.9rem; height: 0.9rem; padding: 0; margin: 0;
+      border: none; border-radius: 50%;
+      background: rgba(255, 255, 255, 0.35);
+      cursor: pointer;
+    }
+    #dots button.active { background: white; }
+    #progress { width: 20rem; height: 0.3rem; background: rgba(255, 255, 255, 0.2); border-radius: 0.2rem; overflow: hidden; }
+    #progress span { display: block; height: 100%; width: 0; background: #0277bd; }
+    #progress span.run { animation: fill var(--rotate-ms, 10s) linear forwards; }
+    @keyframes fill { from { width: 0; } to { width: 100%; } }
+
+    @media (max-width: 800px) {
+      body { padding: 1rem; }
+      .champs { grid-template-columns: 1fr; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .slide.active { animation: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="d-header">
+    <div>
+      <div class="d-title">Cyber Security Awareness Month <img src="images/Jack.png" alt="Logo"></div>
+      <div class="d-subtitle">Caught in a Phish Escape Room</div>
+    </div>
+    <a class="d-back" href="scoreboard.html">&larr; Back to leaderboard</a>
+  </header>
+
+  <main id="stage">
+    <!-- Slide 1: the current leaders -->
+    <section class="slide" id="slide-champions">
+      <h2>Current Leaders</h2>
+      <div class="champs">
+        <div class="champ">
+          <div class="champ-label">Fastest Time</div>
+          <div class="champ-name" id="champ-time-name"></div>
+          <div class="champ-value" id="champ-time-value"></div>
+        </div>
+        <div class="champ">
+          <div class="champ-label">Highest Score</div>
+          <div class="champ-name" id="champ-score-name"></div>
+          <div class="champ-value" id="champ-score-value"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 2: fastest time board -->
+    <section class="slide" id="slide-time">
+      <h2>Fastest Time</h2>
+      <p class="note">All 4 levels completed</p>
+      <div class="d-rows" id="rows-time"></div>
+    </section>
+
+    <!-- Slide 3: highest score board -->
+    <section class="slide" id="slide-score">
+      <h2>Highest Score</h2>
+      <p class="note">&nbsp;</p>
+      <div class="d-rows" id="rows-score"></div>
+    </section>
+  </main>
+
+  <footer class="d-footer">
+    <div id="dots"></div>
+    <div id="progress"><span id="progress-bar"></span></div>
+  </footer>
+
+  <script>
+    const TEAMS_KEY = "teams";
+    const MAX_LEVELS = 4;
+    const ROTATE_MS = 10000;   // how long each slide stays on screen
+    const TOP_N = 5;           // rows shown on each board slide
+
+    // ---------- Data ----------
+    function getTeams() {
+      try { return JSON.parse(localStorage.getItem(TEAMS_KEY)) || []; }
+      catch (e) { return []; }
+    }
+    function totalMs(team) {
+      return team.levels.reduce((sum, lvl) => sum + lvl.ms, 0);
+    }
+    function formatHMS(ms) {
+      const totalSec = Math.max(0, Math.floor(ms / 1000));
+      const h = String(Math.floor(totalSec / 3600)).padStart(2, "0");
+      const m = String(Math.floor((totalSec % 3600) / 60)).padStart(2, "0");
+      const s = String(totalSec % 60).padStart(2, "0");
+      return `${h}:${m}:${s}`;
+    }
+
+    // Adds a rank to each item of an already-sorted list. Ties share a rank (1, 1, 3, ...)
+    function withRanks(sorted, keyFn) {
+      return sorted.map(team => ({
+        team,
+        rank: sorted.findIndex(o => keyFn(o) === keyFn(team)) + 1
+      }));
+    }
+
+    function getBoards() {
+      const teams = getTeams();
+
+      const finished = teams
+        .filter(t => t.levels.length === MAX_LEVELS)
+        .sort((a, b) => totalMs(a) - totalMs(b));
+
+      const scored = teams
+        .filter(t => t.score !== null && t.score !== undefined)
+        .sort((a, b) => b.score - a.score);
+
+      return {
+        time: withRanks(finished, totalMs),
+        score: withRanks(scored, t => t.score)
+      };
+    }
+
+    // ---------- Rendering (textContent only, so team names can't break the page) ----------
+    function el(tag, className, text) {
+      const node = document.createElement(tag);
+      if (className) node.className = className;
+      if (text !== undefined) node.textContent = text;
+      return node;
+    }
+
+    function renderBoard(container, entries, valueFn, emptyText) {
+      container.innerHTML = "";
+      if (entries.length === 0) {
+        container.appendChild(el("p", "d-empty", emptyText));
+        return;
+      }
+      entries.slice(0, TOP_N).forEach(({ team, rank }) => {
+        const row = el("div", "d-row" + (rank <= 3 ? " r" + rank : ""));
+        row.appendChild(el("span", "d-rank", rank));
+        row.appendChild(el("span", "d-name", team.name));
+        row.appendChild(el("span", "d-value", valueFn(team)));
+        container.appendChild(row);
+      });
+    }
+
+    // The leader(s): everyone tied for rank 1 is shown together
+    function renderChampion(nameEl, valueEl, entries, valueFn) {
+      const leaders = entries.filter(e => e.rank === 1);
+      if (leaders.length === 0) {
+        nameEl.textContent = "No results yet";
+        valueEl.textContent = "—";
+        return;
+      }
+      nameEl.textContent = leaders.map(e => e.team.name).join(" & ");
+      valueEl.textContent = valueFn(leaders[0].team);
+    }
+
+    function renderAll() {
+      const boards = getBoards();
+      const timeValue = t => formatHMS(totalMs(t));
+      const scoreValue = t => t.score;
+
+      renderChampion(document.getElementById("champ-time-name"), document.getElementById("champ-time-value"), boards.time, timeValue);
+      renderChampion(document.getElementById("champ-score-name"), document.getElementById("champ-score-value"), boards.score, scoreValue);
+
+      renderBoard(document.getElementById("rows-time"), boards.time, timeValue, `No teams have completed all ${MAX_LEVELS} levels yet.`);
+      renderBoard(document.getElementById("rows-score"), boards.score, scoreValue, "No scores entered yet.");
+    }
+
+    // ---------- Slide rotation ----------
+    const slides = [...document.querySelectorAll(".slide")];
+    const dotsBox = document.getElementById("dots");
+    const progressBar = document.getElementById("progress-bar");
+    document.getElementById("progress").style.setProperty("--rotate-ms", ROTATE_MS + "ms");
+
+    let current = 0;
+    let timer = null;
+
+    slides.forEach((_, i) => {
+      const dot = document.createElement("button");
+      dot.setAttribute("aria-label", `Show slide ${i + 1}`);
+      dot.addEventListener("click", () => go(i));
+      dotsBox.appendChild(dot);
+    });
+
+    function showSlide(i) {
+      current = (i + slides.length) % slides.length;
+      slides.forEach((s, n) => s.classList.toggle("active", n === current));
+      [...dotsBox.children].forEach((d, n) => d.classList.toggle("active", n === current));
+      // restart the countdown bar
+      progressBar.classList.remove("run");
+      void progressBar.offsetWidth;
+      progressBar.classList.add("run");
+    }
+    function nextSlide() { showSlide(current + 1); }
+
+    function startTimer() {
+      clearInterval(timer);
+      timer = setInterval(nextSlide, ROTATE_MS);
+    }
+    // manual navigation (dots / arrow keys) also restarts the 10 second clock
+    function go(i) { showSlide(i); startTimer(); }
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight" || e.key === " ") { e.preventDefault(); go(current + 1); }
+      if (e.key === "ArrowLeft") { e.preventDefault(); go(current - 1); }
+    });
+
+    // Refresh data when another tab changes it, and every few seconds as a fallback.
+    // Neither resets which slide is showing.
+    window.addEventListener("storage", (e) => {
+      if (e.key === TEAMS_KEY) renderAll();
+    });
+    setInterval(renderAll, 3000);
+
+    renderAll();
+    showSlide(0);
+    startTimer();
+  </script>
+</body>
+</html>

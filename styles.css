@@ -407,7 +407,7 @@ button:disabled:hover {
 
 /* *** Button Color Variants *** */
 .btn-green {
-    background-color: #43a047;
+    background-color: rgb(97, 170, 97);
 }
 .btn-green:hover {
     background-color: #2e7031;

@@ -83,6 +83,7 @@
     const TEAMS_KEY = "teams";
     const GAME_KEY = "game";
     const MAX_LEVELS = 4;
+    const MAX_TEAMS = 2;
 
     const teamList = document.getElementById("team-list");
     const countdownDisplay = document.getElementById("countdown-display");
@@ -185,6 +186,7 @@
       const name = teamNameInput.value.trim();
       if (!name) return;
       const teams = getTeams();
+      if (teams.length >= MAX_TEAMS) { closeAddModal(); render(); return; }
       teams.push({ id: uid(), name, levels: [], score: null });
       saveTeams(teams);
       closeAddModal();
@@ -356,6 +358,7 @@
     function render() {
       renderClockAndControls();
       const teams = getTeams();
+      addTeamBtn.style.display = teams.length >= MAX_TEAMS ? "none" : "";
       teamList.innerHTML = "";
 
       if (teams.length === 0) {
@@ -380,7 +383,7 @@
                 <label class="text level-entry-label">Input Duration (Level ${levelsDone + 1}) — M:SS</label>
                 <div class="level-input-row">
                   <input type="text" id="level-value-${team.id}" class="input level-value-input" placeholder="1:30" inputmode="numeric">
-                  <button onclick="saveLevel('${team.id}'); style='background-color: #4caf50;'"">Save</button>
+                  <button onclick="saveLevel('${team.id}')">Save</button>
                 </div>
               </div>
             `;

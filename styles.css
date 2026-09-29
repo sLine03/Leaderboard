@@ -8,7 +8,7 @@
 /* *** Base Styles *** */
 body {
     font-family: 'Titillium Web', sans-serif;
-    background: url('images/plain_background.png') no-repeat center center fixed;
+    background: url('images/Plain_Background.png') no-repeat center center fixed;
     background-size: cover;
     padding: 50px;
     text-align: center;
@@ -303,6 +303,7 @@ button:hover {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
+    justify-content: center;
     gap: 16px;
     margin-top: 20px;
 }

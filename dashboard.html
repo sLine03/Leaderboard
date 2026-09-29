@@ -34,13 +34,10 @@
         <button id="endGameBtn" class="remove-btn">End game</button>
       </div>
 
-      <div id="post-end-controls" class="dashboard-actions" style="display:none;">
-        <button id="newSessionBtn">New Session (Reset)</button>
+      <div class="dashboard-actions">
+        <button id="newSessionBtn" style="display:none;">New Session (Reset)</button>
+        <button onclick="window.location.href='scoreboard.html'">View Leaderboard</button>
       </div>
-
-    <div class="dashboard-actions">
-      <button onclick="window.location.href='scoreboard.html'">View Leaderboard</button>
-    </div>
     </div>
 
     <hr>
@@ -92,7 +89,7 @@
     const timeToggleBtn = document.getElementById("timeToggleBtn");
     const editTimeBtn = document.getElementById("editTimeBtn");
     const endGameBtn = document.getElementById("endGameBtn");
-    const postEndControls = document.getElementById("post-end-controls");
+    const postEndControls = document.getElementById("newSessionBtn");   // only shown once the game has ended
 
     const addTeamBtn = document.getElementById("addTeamBtn");
     const addOverlay = document.getElementById("add-team-overlay");
@@ -371,7 +368,7 @@
         timeToggleBtn.disabled = true;
         editTimeBtn.disabled = true;
         endGameBtn.disabled = true;
-        postEndControls.style.display = "block";
+        postEndControls.style.display = "";
       }
     }
 

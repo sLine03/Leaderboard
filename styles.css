@@ -717,3 +717,8 @@ button:disabled:hover {
 body.editing .edit-col {
     display: table-cell;
 }
+
+.edit-team-name .inputName {
+    margin-top: 0;
+    margin-left: 10px;
+}

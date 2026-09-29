@@ -19,7 +19,10 @@
 
   <main>
     <div id="edit-form" class="edit-form-box">
-      <p class="text edit-team-name"><strong>Team Name: </strong> <span id="teamName"></span></p>
+      <p class="text edit-team-name">
+        <label for="teamName"><strong>Team Name:</strong></label>
+        <input type="text" class="inputName" id="teamName" maxlength="40" autocomplete="off">
+      </p>
 
       <div id="levels-container"></div>
 
@@ -69,9 +72,10 @@
     if (!team) {
       alert("Team not found.");
       window.location.href = "scoreboard.html";
+      throw new Error("Team not found");   // stop here; the redirect is asynchronous
     }
 
-    document.getElementById("teamName").textContent = team.name;
+    document.getElementById("teamName").value = team.name;
     document.getElementById("score").value = team.score ?? "";
 
     const levelsContainer = document.getElementById("levels-container");
@@ -96,6 +100,20 @@
     renderLevels();
 
     function saveChanges() {
+      // Team name: required; warn if another team in the same session already has it
+      const newName = document.getElementById("teamName").value.trim();
+      if (!newName) {
+        alert("Team name can't be empty.");
+        return;
+      }
+      const duplicate = teams.some(t =>
+        t.id !== team.id &&
+        t.sessionId === team.sessionId &&
+        t.name.trim().toLowerCase() === newName.toLowerCase());
+      if (duplicate && !confirm(`Another team in this session is already named "${newName}". Use this name anyway?`)) {
+        return;
+      }
+
       const valueInputs = document.querySelectorAll(".level-value");
 
       valueInputs.forEach(input => {
@@ -107,6 +125,8 @@
         }
         team.levels[i].ms = ms;
       });
+
+      team.name = newName;
 
       const scoreInput = document.getElementById("score").value;
       team.score = scoreInput === "" ? null : parseInt(scoreInput, 10);

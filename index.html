@@ -19,7 +19,7 @@
 
   <main>
     <div class="launcher-buttons">
-      <button onclick="window.location.href='dashboard.html'">Create New Session</button>
+      <button onclick="startNewSession()">Create New Session</button>
       <button onclick="window.location.href='scoreboard.html'">See Leaderboard</button>
     </div>
 
@@ -29,6 +29,22 @@
   </main>
 
   <script>
+    // Starts a fresh session: resets the clock and gives the game a new sessionId so the
+    // dashboard starts with no teams. Old teams stay on the leaderboard.
+    function startNewSession() {
+      const game = JSON.parse(localStorage.getItem("game"));
+      const inProgress = game && (game.status === "running" || game.status === "paused");
+      if (inProgress && !confirm("A session is still in progress. Start a new one? Its clock will be reset, but its teams stay on the leaderboard.")) return;
+      localStorage.setItem("game", JSON.stringify({
+        status: "not_started",
+        durationMs: 45 * 60 * 1000,
+        startTime: null,
+        accumulatedMs: 0,
+        sessionId: Date.now().toString(36) + Math.random().toString(36).slice(2, 7)
+      }));
+      window.location.href = "dashboard.html";
+    }
+
     function fishMove() {
       const fish = document.getElementById("fish");
       let pos = 0;

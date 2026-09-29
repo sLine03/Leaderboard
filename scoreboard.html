@@ -21,14 +21,14 @@
     <hr>
 
     <h2 class="board-heading">Fastest Time <span class="board-heading-note">(all 4 levels completed)</span></h2>
-    <button onclick="toggle();">Edit Scores</button>
+    <button id="editToggleBtn">Edit Scores</button>
     <table>
       <thead>
         <tr>
           <th>Rank</th>
           <th>Name</th>
           <th>Total Time</th>
-          <th></th>
+          <th class="edit-col"></th>
         </tr>
       </thead>
       <tbody id="time-table-body"></tbody>
@@ -41,7 +41,7 @@
           <th>Rank</th>
           <th>Name</th>
           <th>Score</th>
-          <th></th>
+          <th class="edit-col"></th>
         </tr>
       </thead>
       <tbody id="score-table-body"></tbody>
@@ -78,7 +78,19 @@
       return `${h}:${m}:${s}`;
     }
 
+    // Starts a fresh session: resets the clock and gives the game a new sessionId so the
+    // dashboard starts with no teams. Teams already recorded stay on this leaderboard.
     function newGame() {
+      const game = JSON.parse(localStorage.getItem("game"));
+      const inProgress = game && (game.status === "running" || game.status === "paused");
+      if (inProgress && !confirm("A session is still in progress. Start a new one? Its clock will be reset, but its teams stay on the leaderboard.")) return;
+      localStorage.setItem("game", JSON.stringify({
+        status: "not_started",
+        durationMs: 45 * 60 * 1000,
+        startTime: null,
+        accumulatedMs: 0,
+        sessionId: Date.now().toString(36) + Math.random().toString(36).slice(2, 7)
+      }));
       window.location.href = "dashboard.html";
     }
 
@@ -148,7 +160,7 @@
             <td>${index + 1}</td>
             <td>${team.name}</td>
             <td>${formatHMS(totalMs(team))}</td>
-            <td><button id="edit-btn-${team.id}" onclick="goToEdit('${team.id}')" class="edit_button"><img src="images/edit-white-icon.png" class="edit_image" alt="Edit"></button></td>
+            <td class="edit-col"><button id="edit-btn-${team.id}" onclick="goToEdit('${team.id}')" class="edit_button"><img src="images/edit-white-icon.png" class="edit_image" alt="Edit"></button></td>
           `;
           timeBody.appendChild(row);
         });
@@ -170,7 +182,7 @@
             <td>${index + 1}</td>
             <td>${team.name}</td>
             <td>${team.score}</td>
-            <td><button onclick="goToEdit('${team.id}')" class="edit_button"><img src="images/edit-white-icon.png" class="edit_image" alt="Edit"></button></td>
+            <td class="edit-col"><button onclick="goToEdit('${team.id}')" class="edit_button"><img src="images/edit-white-icon.png" class="edit_image" alt="Edit"></button></td>
           `;
           scoreBody.appendChild(row);
         });
@@ -184,16 +196,12 @@
 
     render();
     
-    let toggle = () => {
-      let element = document.getElementById("edit-btn");
-      let hidden = element.getAttribute("hidden");
-
-      if (hidden) {
-        element.removeAttribute("hidden");
-      } else {
-        element.setAttribute("hidden", "hidden");
-      }
-  }
+    // "Edit Scores" shows/hides the edit column (hidden by default)
+    const editToggleBtn = document.getElementById("editToggleBtn");
+    editToggleBtn.addEventListener("click", () => {
+      const editing = document.body.classList.toggle("editing");
+      editToggleBtn.textContent = editing ? "Done Editing" : "Edit Scores";
+    });
   </script>
 </body>
 </html>

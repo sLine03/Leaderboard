@@ -115,18 +115,36 @@
     function saveTeams(teams) {
       localStorage.setItem(TEAMS_KEY, JSON.stringify(teams));
     }
+    function uid() {
+      return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+    }
+    // Every game has a sessionId. Teams are tagged with the sessionId they were added in,
+    // so the dashboard only shows/counts the current session's teams while the
+    // leaderboard keeps everyone.
     function defaultGame() {
-      return { status: "not_started", durationMs: 45 * 60 * 1000, startTime: null, accumulatedMs: 0 };
+      return { status: "not_started", durationMs: 45 * 60 * 1000, startTime: null, accumulatedMs: 0, sessionId: uid() };
     }
     function getGame() {
       const g = JSON.parse(localStorage.getItem(GAME_KEY));
-      return g || defaultGame();
+      if (!g) {                    // nothing stored yet: save it so the sessionId stays stable
+        const fresh = defaultGame();
+        saveGame(fresh);
+        return fresh;
+      }
+      if (!g.sessionId) {          // game saved before sessions existed
+        g.sessionId = uid();
+        saveGame(g);
+      }
+      return g;
     }
     function saveGame(game) {
       localStorage.setItem(GAME_KEY, JSON.stringify(game));
     }
-    function uid() {
-      return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+    // Teams belonging to the current session only (teams without a sessionId are from
+    // before sessions existed, so they're treated as an earlier session)
+    function getSessionTeams() {
+      const sid = getGame().sessionId;
+      return getTeams().filter(t => t.sessionId === sid);
     }
 
     // ---------- Time helpers ----------
@@ -185,9 +203,9 @@
       e.preventDefault();
       const name = teamNameInput.value.trim();
       if (!name) return;
+      if (getSessionTeams().length >= MAX_TEAMS) { closeAddModal(); render(); return; }
       const teams = getTeams();
-      if (teams.length >= MAX_TEAMS) { closeAddModal(); render(); return; }
-      teams.push({ id: uid(), name, levels: [], score: null });
+      teams.push({ id: uid(), name, levels: [], score: null, sessionId: getGame().sessionId });
       saveTeams(teams);
       closeAddModal();
       render();
@@ -233,7 +251,8 @@
           status: "running",
           durationMs,
           startTime: Date.now(),
-          accumulatedMs: 0
+          accumulatedMs: 0,
+          sessionId: game.sessionId
         });
       } else if (game.status === "running") {
         game.accumulatedMs = elapsedMs(game);
@@ -260,8 +279,9 @@
     });
 
     document.getElementById("newSessionBtn").addEventListener("click", () => {
-      if (!confirm("Start a new session? This resets the clock. Teams and their recorded times/scores stay on the leaderboard — use \"Reset Leaderboard\" on the leaderboard page to clear them.")) return;
-      saveGame(defaultGame());
+      if (!confirm("Start a new session? This resets the clock and clears the team cards so you can add new teams. Previous teams and their times/scores stay on the leaderboard — use \"Reset Leaderboard\" on the leaderboard page to clear them.")) return;
+      saveGame(defaultGame());   // new sessionId => current session's teams are archived
+      openPanels.clear();
       render();
     });
 
@@ -305,7 +325,7 @@
     }
 
     function removeTeam(id) {
-      if (!confirm("Remove this team?")) return;
+      if (!confirm("Remove this team? This also removes them from the leaderboard.")) return;
       const teams = getTeams().filter(t => t.id !== id);
       saveTeams(teams);
       openPanels.delete(id);
@@ -357,7 +377,8 @@
 
     function render() {
       renderClockAndControls();
-      const teams = getTeams();
+      const teams = getSessionTeams();
+      // Max of two teams per session: hide the button once the limit is reached
       addTeamBtn.style.display = teams.length >= MAX_TEAMS ? "none" : "";
       teamList.innerHTML = "";
 

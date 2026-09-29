@@ -708,3 +708,12 @@ button:disabled:hover {
     0%, 100% { transform: translateY(0); }
     50%      { transform: translateY(-10px); }
 }
+
+/* *** Leaderboard: edit column is hidden until "Edit Scores" is clicked *** */
+.edit-col {
+    display: none;
+}
+
+body.editing .edit-col {
+    display: table-cell;
+}
